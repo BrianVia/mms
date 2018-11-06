@@ -73,156 +73,170 @@ const styles = theme => ({
 });
 
 class Collection extends Component {
-	state = {
-		tracks: [],
-	}
-	collectionID = null;
-	sort = null;
-	filters = [];
+    state = {
+    	tracks: [],
+    }
+    collectionID = null;
+    sort = null;
+    filters = [];
 
-	updateContent = () => {
-		this.setState({ tracks: [] });
-		if (this.props.search) {
-			Server.search(this.props.searchTerm, this.sort, this.filters).then(tracklist =>
-				this.setState({ tracks: tracklist })
-			);
-		} else {
-			Server.getTracklist(this.collectionID, this.sort, this.filters).then(tracklist =>
-				this.setState({ tracks: tracklist })
-			);
-		}
-	}
+    updateContent = () => {
+    	this.setState({ tracks: [] });
+    	if (this.props.search) {
+    		Server.search(this.props.searchTerm, this.sort, this.filters).then(tracklist =>
+    			this.setState({ tracks: tracklist })
+    		);
+    	} else {
+    		Server.getTracklist(this.collectionID, this.sort, this.filters).then(tracklist =>
+    			this.setState({ tracks: tracklist })
+    		);
+    	}
+    }
 
-	componentDidMount = () => {
-		this.collectionID = this.props.collectionID;
-		this.filters = getCollectionFilters();
-		this.updateContent();
-		subscribeCollectionSort(this.handleChangeSort);
-		subscribeCollectionChangeFilters(this.handleChangeFilters);
-	}
+    componentDidMount = () => {
+    	this.collectionID = this.props.collectionID;
+    	this.filters = getCollectionFilters();
+    	this.updateContent();
+    	subscribeCollectionSort(this.handleChangeSort);
+    	subscribeCollectionChangeFilters(this.handleChangeFilters);
+    }
 
-	componentDidUpdate = (prevProps) => {
-		if (this.props.collectionID !== prevProps.collectionID ||
-			this.props.search !== prevProps.search ||
-			this.props.searchTerm !== prevProps.searchTerm) {
-			this.collectionID = this.props.collectionID;
-			this.updateContent();
-		}
-	}
+    componentDidUpdate = (prevProps) => {
+    	if (this.props.collectionID !== prevProps.collectionID ||
+            this.props.search !== prevProps.search ||
+            this.props.searchTerm !== prevProps.searchTerm) {
+    		this.collectionID = this.props.collectionID;
+    		this.updateContent();
+    	}
+    }
 
-	handleChangeSort = (data) => {
-		this.sort = data.newSort;
-		this.updateContent();
-	}
+    handleChangeSort = (data) => {
+    	this.sort = data.newSort;
+    	this.updateContent();
+    }
 
-	handleChangeFilters = (data) => {
-		this.filters = data.filters;
-		this.updateContent();
-	}
+    handleChangeFilters = (data) => {
+    	this.filters = data.filters;
+    	this.updateContent();
+    }
 
-	getArtistCellData = ({ rowData }) => {
-		if (rowData.artists)
-			return rowData.artists.join('; ');
-		else
-			return '';
-	}
+    getArtistCellData = ({ rowData }) => {
+    	console.log(rowData);
+    	if (rowData.artists)
+    		return rowData.artists.join('; ');
+    	else
+    		return '';
+    }
 
-	getDurationCellData = ({ rowData }) => {
-		var duration = rowData.duration;
-		if (duration >= 0) {
-			var min = String(Math.trunc(duration / 60) + ':');
-			var sec = String(Math.trunc(duration % 60));
-			while (sec.length < 2)
-				sec = '0' + sec;
-			return min + sec;
-		} else
-			return '';
-	}
+    getDurationCellData = ({ rowData }) => {
+    	var duration = rowData.duration;
+    	if (duration >= 0) {
+    		var min = String(Math.trunc(duration / 60) + ':');
+    		var sec = String(Math.trunc(duration % 60));
+    		while (sec.length < 2)
+    			sec = '0' + sec;
+    		return min + sec;
+    	} else
+    		return '';
+    }
 
-	renderArtwork = ({ rowData }) => {
-		if (rowData.artworkURL)
-			return (<img
-				src={rowData.artworkURL}
-				alt='artwork'
-				className={this.props.classes.artwork} />);
-		else {
-			var short = (rowData.album || '').slice(0, 2);
-			return (
-				<Avatar className={this.props.classes.albumAvatar}>{short}</Avatar>
-			);
-		}
-	}
+    renderArtwork = ({ rowData }) => {
+    	if (rowData.artworkURL)
+    		return (<img
+    			src={rowData.artworkURL}
+    			alt='artwork'
+    			className={this.props.classes.artwork} />);
+    	else {
+    		var short = (rowData.album || '').slice(0, 2);
+    		return (
+    			<Avatar className={this.props.classes.albumAvatar}>{short}</Avatar>
+    		);
+    	}
+    }
 
-	handleTrackClick = ({ rowData }) => {
-		Playback.playMediaItem(rowData);
-	}
+    handleTrackClick = ({ rowData }) => {
+    	Playback.playMediaItem(rowData);
+    }
 
-	render() {
-		const { classes } = this.props;
+    render() {
+    	const { classes } = this.props;
 
-		return (
-			<div className={classes.root}>
-				<AutoSizer>
-					{({ height, width }) => (
-						<Table
-							width={width}
-							height={height}
-							className={classes.table}
-							gridClassName={classes.grid}
-							disableHeader
-							// headerHeight={20}
-							rowHeight={48}
-							rowCount={this.state.tracks.length}
-							rowGetter={({ index }) => this.state.tracks[index]}
-							rowClassName={classes.row}
-							onRowClick={this.handleTrackClick}
-						>
-							<Column
-								label='Artwork'
-								dataKey='artworkURL'
-								className={classes.cellArtwork}
-								width={48}
-								flexGrow={0}
-								flexShrink={0}
-								cellRenderer={this.renderArtwork}
-							/>
-							<Column
-								label='Name'
-								dataKey='title'
-								className={classes.cell}
-								width={250}
-								flexGrow={10}
-							/>
-							<Column
-								label='Artist'
-								dataKey='artists'
-								width={250}
-								flexGrow={10}
-								className={classes.cell}
-								cellDataGetter={this.getArtistCellData}
-							/>
-							<Column
-								label='Album'
-								dataKey='album'
-								width={250}
-								flexGrow={10}
-								className={classes.cell}
-							/>
-							<Column
-								label='Length'
-								dataKey='duration'
-								width={40}
-								flexGrow={0}
-								flexShrink={0}
-								className={classes.cellRight}
-								cellDataGetter={this.getDurationCellData}
-							/>
-						</Table>
-					)}
-				</AutoSizer>
-			</div>
-		);
-	}
+    	return (
+    		<div className={classes.root}>
+    			<AutoSizer>
+    				{({ height, width }) => (
+    					<Table
+    						width={width}
+    						height={height}
+    						className={classes.table}
+    						gridClassName={classes.grid}
+    						disableHeader
+    						// headerHeight={20}
+    						rowHeight={48}
+    						rowCount={this.state.tracks.length}
+    						rowGetter={({ index }) => this.state.tracks[index]}
+    						rowClassName={classes.row}
+    						onRowClick={this.handleTrackClick}
+    					>
+    						<Column
+    							label='Artwork'
+    							dataKey='artworkURL'
+    							className={classes.cellArtwork}
+    							width={48}
+    							flexGrow={0}
+    							flexShrink={0}
+    							cellRenderer={this.renderArtwork}
+    						/>
+    						<Column
+    							label='Name'
+    							dataKey='title'
+    							className={classes.cell}
+    							width={250}
+    							flexGrow={10}
+    						/>
+    						<Column
+    							label='Artist'
+    							dataKey='artists'
+    							width={250}
+    							flexGrow={10}
+    							className={classes.cell}
+    							cellDataGetter={this.getArtistCellData}
+    						/>
+    						<Column
+    							label='Album'
+    							dataKey='album'
+    							width={250}
+    							flexGrow={10}
+    							className={classes.cell}
+    						/>
+    						<Column label='Genre'
+    							dataKey='genres'
+    							width={100}
+    							flexGrow={10}
+    							className={classes.cell}
+    						/>
+    						<Column label='Year'
+    							dataKey='year'
+    							width={15}
+    							flexGrow={10}
+    							className={classes.cell}
+    						/>
+    						<Column
+    							label='Length'
+    							dataKey='duration'
+    							width={40}
+    							flexGrow={0}
+    							flexShrink={0}
+    							className={classes.cellRight}
+    							cellDataGetter={this.getDurationCellData}
+    						/>
+
+    					</Table>
+    				)}
+    			</AutoSizer>
+    		</div>
+    	);
+    }
 }
 
 Collection.propTypes = {
