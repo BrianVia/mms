@@ -13,6 +13,10 @@ The code is based on upnpserver package.
 
 * 'uws' package needs binary modules, for platforms where we can't compile (some NAS devices) we might want to replace it by 'ws' in engine.io
 
+## Running
+    $ npm start
+    Server will start on port 10222
+
 ## Testing
 For testing purposes used *mocha* framework. To run tests, you should do this:
 ```bash
