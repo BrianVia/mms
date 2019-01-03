@@ -57,7 +57,7 @@ systemctl enable mediamonkeyserver.service
 systemctl status mediamonkeyserver.service
 ```
 
-    If all went well your service should be running.
+If all went well your service should be running.
 
 * Configuration changes
 
