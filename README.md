@@ -20,7 +20,6 @@ The code is based on upnpserver package.
 ## Running as a Service with Systemd
 Below is a systemd script that can be created and placed in /etc/systemd/system/mediamonkeyserver.service so that the server can be run on system startup.  Make sure you change your paths/variables for your system. 
 
-    ```bash
     [Unit]
     Description=MediaMonkeyServer
 
@@ -45,8 +44,7 @@ Below is a systemd script that can be created and placed in /etc/systemd/system/
     [Install]
     WantedBy=multi-user.target
 
-    ```
-    
+
 Finish the setup with the following steps: 
 
 * Enable the service
@@ -59,9 +57,10 @@ systemctl enable mediamonkeyserver.service
 systemctl status mediamonkeyserver.service
 ```
 
-If all went well your service should be running.
+    If all went well your service should be running.
 
 * Configuration changes
+
 If you make any changes to this file, you'll need to reload the daemon with this command:
 ```bash
 systemctl daemon-reload
