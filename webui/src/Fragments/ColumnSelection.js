@@ -22,6 +22,12 @@ class ColumnSelection extends Component {
         displayedColumns: []
     }
 
+    onColumnSelectionChange = (e, child) => {
+        let newColumns = this.props.columns;
+        newColumns[child.key].display = !newColumns[child.key].display;
+        this.props.updateDisplayedColumns(newColumns);
+    };
+
     render() {
 
         return (
@@ -30,12 +36,13 @@ class ColumnSelection extends Component {
                     <Select
                         IconComponent={() => (
                             <List />
-                          )}>
+                          )}
                         value={this.state.displayedColumns}
                         multiple
                         onChange={this.onColumnSelectionChange}
                         input={<Input id="select-multiple-checkbox" />}
                         renderValue={selected => selected.join(", ")}
+                       
                     >
                         {Object.keys(this.props.columns).map(key => (
                             <MenuItem
