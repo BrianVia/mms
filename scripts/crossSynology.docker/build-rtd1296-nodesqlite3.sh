@@ -1,5 +1,10 @@
 #! /bin/bash
 # Based on info from: https://chrislea.com/2018/08/20/cross-compiling-node-js-for-arm-on-ubuntu/
+curl -sL https://raw.githubusercontent.com/creationix/nvm/v0.33.8/install.sh -o install_nvm.sh
+bash install_nvm.sh
+. ~/.nvm/nvm.sh   # to make nvm usable from shell
+nvm install 8.15.0
+nvm use 8.15.0
 
 export CC="/synotoolkit/build_env/ds.rtd1296-6.2/usr/local/aarch64-unknown-linux-gnueabi/bin/aarch64-unknown-linux-gnueabi-gcc"
 export CXX="/synotoolkit/build_env/ds.rtd1296-6.2/usr/local/aarch64-unknown-linux-gnueabi/bin/aarch64-unknown-linux-gnueabi-g++"
@@ -18,12 +23,7 @@ export SOLINK_MODULE_host="g++"
 cp /synotoolkit/build_env/ds.rtd1296-6.2/usr/local/aarch64-unknown-linux-gnueabi/aarch64-unknown-linux-gnueabi/sysroot/usr/lib/* /synotoolkit/build_env/ds.rtd1296-6.2/usr/local/aarch64-unknown-linux-gnueabi/aarch64-unknown-linux-gnueabi/sysroot/usr/lib64/ -r
 
 cd /
-git clone https://github.com/nodejs/node.git
-cd /node
-git checkout v8.11.3
-wget https://raw.githubusercontent.com/zeit/pkg-fetch/master/patches/node.v8.11.3.cpp.patch
-git apply node.v8.11.3.cpp.patch
-/bin/bash ./configure --prefix=../install --dest-cpu=arm64 --cross-compiling --dest-os=linux --with-arm-float-abi=hard --with-arm-fpu=neon
-# make -j6 parameter caused freezes of the build process (JH)
-make
-cp out/Release/node /nodepkg/node-arm64-rtd1296-synology
+mkdir sqlite3
+cd sqlite
+npm install sqlite3 --build-from-source --target_arch=arm
+cp -r /sqlite/node_modules/sqlite3/lib/binding /local
