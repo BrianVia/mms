@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-//import PropTypes from 'prop-types';
+import PropTypes from 'prop-types';
 import { withStyles, withTheme } from '@material-ui/core/styles';
 
 
@@ -13,52 +13,73 @@ import Select from '@material-ui/core/Select';
 import List from '@material-ui/icons/List';
 
 const styles = theme => ({
-    width: '50px'
+	width: '50px',
+	listIconStyle: {
+		position: 'absolute',
+		top: '0',
+		right: '0',
+		display: 'inline-block',
+		color: '#000',
+		width: '40px',
+		height: '40px',
+		pointerEvents: 'none',
+	}
+
 });
 
 class ColumnSelection extends Component {
 
-    state = {
-        displayedColumns: []
-    }
+	state = {
+		displayedColumns: []
+	}
 
-    onColumnSelectionChange = (e, child) => {
-        let newColumns = this.props.columns;
-        newColumns[child.key].display = !newColumns[child.key].display;
-        this.props.updateDisplayedColumns(newColumns);
-    };
+	onColumnSelectionChange = (e, child) => {
+		let newColumns = this.props.columns;
+		newColumns[child.key].display = !newColumns[child.key].display;
+		this.props.updateDisplayedColumns(newColumns);
+	};
 
-    render() {
+	componentDidMount = () => {
+		console.log(this.props);
+	}
 
-        return (
-            <div>
-                <FormControl>
-                    <Select
-                        IconComponent={() => (
-                            <List />
-                          )}
-                        value={this.state.displayedColumns}
-                        multiple
-                        onChange={this.onColumnSelectionChange}
-                        input={<Input id="select-multiple-checkbox" />}
-                        renderValue={selected => selected.join(", ")}
-                       
-                    >
-                        {Object.keys(this.props.columns).map(key => (
-                            <MenuItem
-                                key={this.props.columns[key].name}
-                                value={this.props.columns[key].display}
-                            >
-                                <Checkbox checked={this.props.columns[key].display} />
-                                <ListItemText primary={this.props.columns[key].label} />
-                            </MenuItem>
-                        ))}
-                    </Select>
-                </FormControl>
-            </div>
-        )
-    }
+	render() {
+		const { classes } = this.props;
+		console.log(classes);
 
+		return (
+
+
+			<Select
+				IconComponent={() =>
+					<List className={classes.listIconStyle} />
+				}
+				value={this.state.displayedColumns}
+				multiple
+				onChange={this.onColumnSelectionChange}
+				input={<Input id="select-multiple-checkbox" />}
+				renderValue={selected => selected.join(", ")}
+
+			>
+				{Object.keys(this.props.columns).map(key => (
+					<MenuItem
+						key={this.props.columns[key].name}
+						value={this.props.columns[key].display}
+					>
+						<Checkbox checked={this.props.columns[key].display} />
+						<ListItemText primary={this.props.columns[key].label} />
+					</MenuItem>
+				))}
+			</Select>
+
+		)
+	}
+
+}
+
+ColumnSelection.propTypes = {
+	columns: PropTypes.object.isRequired,
+	classes: PropTypes.object.isRequired
 }
 
 export default withTheme()(withStyles(styles)(ColumnSelection));

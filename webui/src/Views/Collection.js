@@ -507,11 +507,11 @@ class Collection extends Component {
 							{/*Column Selection Empty Column */}
 							{this.state.renderTableHeader ? (<Column
 								headerRenderer={this.renderColumnSelectionHeader}
-								width={15}
+								width={45}
 								flexGrow={0}
 								flexShrink={0}
 								dataKey=""
-								className={classes.cellInLastColumn}
+								className={classes.cell}
 							/>) : null}
 						</Table>
 					)}
