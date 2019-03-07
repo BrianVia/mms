@@ -294,6 +294,10 @@ class Collection extends Component {
 
 			}
 		}
+
+		if (Playback.getActive()) {
+			this.setState({ playingTrack: Playback.getCurrentMediaItem() });
+		}
 	};
 
 	componentDidUpdate = prevProps => {
@@ -376,12 +380,13 @@ class Collection extends Component {
 
 
 	handleTrackDoubleClick = ({ rowData, e }) => {
-
 		Playback.playMediaItem(rowData);
 		this.setState({ playingTrack: rowData });
+		this.setState({ selectedTrack: rowData });
 	};
 
 	handleTrackClick = ({ event, index, rowData }) => {
+		//@TODO implement track list selection
 		this.setState({ selectedTrack: rowData });
 	};
 
