@@ -1,33 +1,33 @@
-import React, { Component } from "react";
-import PropTypes from "prop-types";
-import { withStyles } from "@material-ui/core/styles";
-import "react-virtualized/styles.css";
-import { AutoSizer } from "react-virtualized";
-import { Table, Column } from "react-virtualized";
-import Avatar from "@material-ui/core/Avatar";
+import React, { Component } from 'react';
+import PropTypes from 'prop-types';
+import { withStyles } from '@material-ui/core/styles';
+import 'react-virtualized/styles.css';
+import { AutoSizer } from 'react-virtualized';
+import { Table, Column } from 'react-virtualized';
+import Avatar from '@material-ui/core/Avatar';
 
 
-import Server from "server";
-import Playback from "playback";
+import Server from 'server';
+import Playback from 'playback';
 import {
 	subscribeCollectionSort,
 	subscribeCollectionChangeFilters,
 	getCollectionFilters
-} from "actions";
+} from 'actions';
 
-import ColumnSelection from "../Fragments/ColumnSelection";
+import ColumnSelection from '../Fragments/ColumnSelection';
 
 const styles = theme => ({
 	root: {
-		position: "absolute", // For correct positioning of the virtual table
+		position: 'absolute', // For correct positioning of the virtual table
 		left: 0,
 		top: 0,
 		right: 0,
 		bottom: 0,
-		overflow: "hidden"
+		overflow: 'hidden'
 	},
 	table: {
-		boxSizing: "border-box",
+		boxSizing: 'border-box',
 		border: `0px solid ${theme.palette.divider}`,
 		fontSize: theme.typography.pxToRem(14),
 		color: theme.palette.text.primary
@@ -38,27 +38,27 @@ const styles = theme => ({
 	row: {
 		borderBottom: `1px solid ${theme.palette.divider}`,
 		outline: 0,
-		cursor: "pointer"
+		cursor: 'pointer'
 	},
 	artwork: {
-		width: "100%",
-		height: "100%",
-		objectFit: "contain",
-		objectPosition: "center center",
-		maxWidth: "100%",
-		maxHeight: "100%"
+		width: '100%',
+		height: '100%',
+		objectFit: 'contain',
+		objectPosition: 'center center',
+		maxWidth: '100%',
+		maxHeight: '100%'
 	},
 	cellArtwork: {
-		padding: "2px 0px 2px 0px",
+		padding: '2px 0px 2px 0px',
 		height: 48 // Not sure why this is needed explicitly here, otherwise image is offset few pixels up
 	},
 	cell: {
-		textAlign: "left",
-		padding: "4px 2px 4px 4px"
+		textAlign: 'left',
+		padding: '4px 2px 4px 4px'
 	},
 	cellRight: {
-		textAlign: "right",
-		padding: "4px 10px 4px 4px"
+		textAlign: 'right',
+		padding: '4px 10px 4px 4px'
 	},
 	cellHeader: {
 		fontSize: theme.typography.pxToRem(12),
@@ -69,7 +69,7 @@ const styles = theme => ({
 		paddingRight: theme.spacing.unit * 3
 	},
 	cellInLastRow: {
-		borderBottom: "none"
+		borderBottom: 'none'
 	},
 	footer: {
 		borderTop: `1px solid ${theme.palette.text.divider}`
@@ -87,56 +87,56 @@ class Collection extends Component {
 		renderTableHeader: false,
 		columns: {
 			title: {
-				name: "title",
-				label: "Title",
+				name: 'title',
+				label: 'Title',
 				display: true,
 				width: 200
 			},
 			artist: {
-				name: "artist",
-				label: "Artist",
+				name: 'artist',
+				label: 'Artist',
 				display: true,
 				width: 150
 			},
 			album: {
-				name: "album",
-				label: "Album",
+				name: 'album',
+				label: 'Album',
 				display: true,
 				width: 100
 			},
 			duration: {
-				name: "duration",
-				label: "Duration",
+				name: 'duration',
+				label: 'Duration',
 				display: true,
 				width: 20
 			},
 			genre: {
-				name: "genre",
-				label: "Genre",
+				name: 'genre',
+				label: 'Genre',
 				display: true,
 				width: 50
 			},
 			year: {
-				name: "year",
-				label: "Year",
+				name: 'year',
+				label: 'Year',
 				display: true,
 				width: 30
 			},
 			bpm: {
-				name: "bpm",
-				label: "BPM",
+				name: 'bpm',
+				label: 'BPM',
 				display: true,
 				width: 30
 			},
 			path: {
-				name: "path",
-				label: "Path",
+				name: 'path',
+				label: 'Path',
 				display: false,
 				width: 40
 			},
 			size: {
-				name: "size",
-				label: "Size",
+				name: 'size',
+				label: 'Size',
 				display: true,
 				width: 40
 			}
@@ -147,112 +147,112 @@ class Collection extends Component {
 	filters = [];
 	defaultDesktopColumns = {
 		title: {
-			name: "title",
-			label: "Title",
+			name: 'title',
+			label: 'Title',
 			display: true,
 			width: 200
 		},
 		artist: {
-			name: "artist",
-			label: "Artist",
+			name: 'artist',
+			label: 'Artist',
 			display: true,
 			width: 150
 		},
 		album: {
-			name: "album",
-			label: "Album",
+			name: 'album',
+			label: 'Album',
 			display: true,
 			width: 200
 		},
 		duration: {
-			name: "duration",
-			label: "Duration",
+			name: 'duration',
+			label: 'Duration',
 			display: true,
 			width: 20
 		},
 		genre: {
-			name: "genre",
-			label: "Genre",
+			name: 'genre',
+			label: 'Genre',
 			display: true,
 			width: 50
 		},
 		year: {
-			name: "year",
-			label: "Year",
+			name: 'year',
+			label: 'Year',
 			display: true,
 			width: 30
 		},
 		bpm: {
-			name: "bpm",
-			label: "BPM",
+			name: 'bpm',
+			label: 'BPM',
 			display: true,
 			width: 30
 		},
 		path: {
-			name: "path",
-			label: "Path",
+			name: 'path',
+			label: 'Path',
 			display: false,
 			width: 40
 		},
 		size: {
-			name: "size",
-			label: "Size",
+			name: 'size',
+			label: 'Size',
 			display: true,
 			width: 40
 		}
 	};
 	defaultMobileColumns = {
 		title: {
-			name: "title",
-			label: "Title",
+			name: 'title',
+			label: 'Title',
 			display: true,
 			width: 100
 		},
 		artist: {
-			name: "artist",
-			label: "Artist",
+			name: 'artist',
+			label: 'Artist',
 			display: true,
 			width: 100
 		},
 		album: {
-			name: "album",
-			label: "Album",
+			name: 'album',
+			label: 'Album',
 			display: true,
 			width: 100
 		},
 		duration: {
-			name: "duration",
-			label: "Duration",
+			name: 'duration',
+			label: 'Duration',
 			display: false,
 			width: 0
 		},
 		genre: {
-			name: "genre",
-			label: "Genre",
+			name: 'genre',
+			label: 'Genre',
 			display: false,
 			width: 0
 		},
 		year: {
-			name: "year",
-			label: "Year",
+			name: 'year',
+			label: 'Year',
 			display: false,
 			width: 0
 		},
 		bpm: {
-			name: "bpm",
-			label: "BPM",
+			name: 'bpm',
+			label: 'BPM',
 			display: false,
 			width: 0
 		},
 		path: {
-			name: "path",
-			label: "Path",
+			name: 'path',
+			label: 'Path',
 			display: false,
 			width: 0
 		},
 		size: {
-			name: "size",
-			label: "Size",
+			name: 'size',
+			label: 'Size',
 			display: false,
 			width: 0
 		}
@@ -281,7 +281,7 @@ class Collection extends Component {
 		const localStorageRefColumns = localStorage.getItem('columns');
 
 		if (localStorageRefColumns) {
-			this.setState({ columns: JSON.parse(localStorageRefColumns) })
+			this.setState({ columns: JSON.parse(localStorageRefColumns) });
 		} else {
 			if (window.innerWidth < 768) {
 				this.setState({ columns: this.defaultMobileColumns });
@@ -333,9 +333,9 @@ class Collection extends Component {
 	getDurationCellData = ({ rowData }) => {
 		var duration = rowData.duration;
 		if (duration >= 0) {
-			var min = String(Math.trunc(duration / 60) + ":");
+			var min = String(Math.trunc(duration / 60) + ':');
 			var sec = String(Math.trunc(duration % 60));
-			while (sec.length < 2) sec = "0" + sec;
+			while (sec.length < 2) sec = '0' + sec;
 			return min + sec;
 		} else return '';
 	};
@@ -358,10 +358,8 @@ class Collection extends Component {
 	};
 
 	updateDisplayedColumns = (newColumns) => {
-
-		this.setState({ columns: newColumns })
+		this.setState({ columns: newColumns });
 		localStorage.setItem('columns', JSON.stringify(newColumns));
-
 	}
 
 	renderColumnSelectionHeader = () => {
