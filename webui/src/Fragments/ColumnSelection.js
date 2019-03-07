@@ -6,7 +6,6 @@ import { withStyles, withTheme } from '@material-ui/core/styles';
 import Input from '@material-ui/core/Input';
 // import InputLabel from '@material-ui/core/InputLabel';
 import MenuItem from '@material-ui/core/MenuItem';
-import FormControl from '@material-ui/core/FormControl';
 import ListItemText from '@material-ui/core/ListItemText';
 import Checkbox from '@material-ui/core/Checkbox';
 import Select from '@material-ui/core/Select';
