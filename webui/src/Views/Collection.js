@@ -89,47 +89,56 @@ class Collection extends Component {
 			title: {
 				name: "title",
 				label: "Title",
-				display: true
+				display: true,
+				width: 200
 			},
 			artist: {
 				name: "artist",
 				label: "Artist",
-				display: true
+				display: true,
+				width: 150
 			},
 			album: {
 				name: "album",
 				label: "Album",
-				display: true
+				display: true,
+				width: 100
 			},
 			duration: {
 				name: "duration",
 				label: "Duration",
-				display: true
+				display: true,
+				width: 20
 			},
 			genre: {
 				name: "genre",
 				label: "Genre",
-				display: true
+				display: true,
+				width: 50
 			},
 			year: {
 				name: "year",
 				label: "Year",
-				display: true
+				display: true,
+				width: 30
 			},
 			bpm: {
 				name: "bpm",
 				label: "BPM",
-				display: true
+				display: true,
+				width: 30
 			},
 			path: {
 				name: "path",
 				label: "Path",
-				display: true
+				display: false,
+				width: 40
 			},
 			size: {
 				name: "size",
 				label: "Size",
-				display: true
+				display: true,
+				width: 40
 			}
 		}
 	};
@@ -140,94 +149,112 @@ class Collection extends Component {
 		title: {
 			name: "title",
 			label: "Title",
-			display: true
+			display: true,
+			width: 200
 		},
 		artist: {
 			name: "artist",
 			label: "Artist",
-			display: true
+			display: true,
+			width: 150
 		},
 		album: {
 			name: "album",
 			label: "Album",
-			display: true
+			display: true,
+			width: 200
 		},
 		duration: {
 			name: "duration",
 			label: "Duration",
-			display: true
+			display: true,
+			width: 20
 		},
 		genre: {
 			name: "genre",
 			label: "Genre",
-			display: true
+			display: true,
+			width: 50
 		},
 		year: {
 			name: "year",
 			label: "Year",
-			display: true
+			display: true,
+			width: 30
 		},
 		bpm: {
 			name: "bpm",
 			label: "BPM",
-			display: true
+			display: true,
+			width: 30
 		},
 		path: {
 			name: "path",
 			label: "Path",
-			display: true
+			display: false,
+			width: 40
 		},
 		size: {
 			name: "size",
 			label: "Size",
-			display: true
+			display: true,
+			width: 40
 		}
 	};
 	defaultMobileColumns = {
 		title: {
 			name: "title",
 			label: "Title",
-			display: true
+			display: true,
+			width: 100
 		},
 		artist: {
 			name: "artist",
 			label: "Artist",
-			display: true
+			display: true,
+			width: 100
 		},
 		album: {
 			name: "album",
 			label: "Album",
-			display: true
+			display: true,
+			width: 100
 		},
 		duration: {
 			name: "duration",
 			label: "Duration",
-			display: false
+			display: false,
+			width: 0
 		},
 		genre: {
 			name: "genre",
 			label: "Genre",
-			display: false
+			display: false,
+			width: 0
 		},
 		year: {
 			name: "year",
 			label: "Year",
-			display: false
+			display: false,
+			width: 0
 		},
 		bpm: {
 			name: "bpm",
 			label: "BPM",
-			display: false
+			display: false,
+			width: 0
 		},
 		path: {
 			name: "path",
 			label: "Path",
-			display: false
+			display: false,
+			width: 0
 		},
 		size: {
 			name: "size",
 			label: "Size",
-			display: false
+			display: false,
+			width: 0
 		}
 	}
 
@@ -290,16 +317,16 @@ class Collection extends Component {
 	};
 
 	getArtistCellData = ({ rowData }) => {
-		if (rowData.artists) return rowData.artists.join("; ");
-		else return "";
+		if (rowData.artists) return rowData.artists.join('; ');
+		else return '';
 	};
 
 	getFileSizeCellData = ({ rowData }) => {
 		let fileSize = rowData.size;
 		if (fileSize > 1024 && fileSize < 1048576) {
-			return (fileSize / 1024).toFixed(2) + " KB";
+			return (fileSize / 1024).toFixed(2) + ' KB';
 		} else if (fileSize > 1048576) {
-			return (fileSize / 1048576).toFixed(2) + " MB";
+			return (fileSize / 1048576).toFixed(2) + ' MB';
 		}
 	};
 
@@ -310,7 +337,7 @@ class Collection extends Component {
 			var sec = String(Math.trunc(duration % 60));
 			while (sec.length < 2) sec = "0" + sec;
 			return min + sec;
-		} else return "";
+		} else return '';
 	};
 
 	renderArtwork = ({ rowData }) => {
@@ -323,7 +350,7 @@ class Collection extends Component {
 				/>
 			);
 		else {
-			var short = (rowData.album || "").slice(0, 2);
+			var short = (rowData.album || '').slice(0, 2);
 			return (
 				<Avatar className={this.props.classes.albumAvatar}>{short}</Avatar>
 			);
@@ -374,22 +401,26 @@ class Collection extends Component {
 							rowClassName={classes.row}
 							onRowClick={this.handleTrackClick}
 						>
-							<Column
-								label="Artwork"
-								dataKey="artworkURL"
-								className={classes.cellArtwork}
-								width={48}
-								flexGrow={0}
-								flexShrink={0}
-								cellRenderer={this.renderArtwork}
-							/>
+							{
+								this.state.renderTableHeader ? (
+									<Column
+										label="Artwork"
+										dataKey="artworkURL"
+										className={classes.cellArtwork}
+										width={48}
+										flexGrow={0}
+										flexShrink={0}
+										cellRenderer={this.renderArtwork}
+									/>
+								) : null
+							}
 							{this.state.columns.title.display ? (
 								<Column
 									label="Track Title"
 									dataKey="title"
 									headerHeight={headerHeight}
 									className={classes.cell}
-									width={250}
+									width={this.state.columns.title.width}
 									flexGrow={10}
 								/>
 							) : null}
@@ -397,7 +428,7 @@ class Collection extends Component {
 								<Column
 									label="Artist"
 									dataKey="artists"
-									width={250}
+									width={this.state.columns.artist.width}
 									flexGrow={10}
 									className={classes.cell}
 									cellDataGetter={this.getArtistCellData}
@@ -407,7 +438,7 @@ class Collection extends Component {
 								<Column
 									label="Album"
 									dataKey="album"
-									width={250}
+									width={this.state.columns.album.width}
 									flexGrow={10}
 									className={classes.cell}
 								/>
@@ -416,7 +447,7 @@ class Collection extends Component {
 								<Column
 									label="Genre"
 									dataKey="genres"
-									width={100}
+									width={this.state.columns.genre.width}
 									flexGrow={10}
 									className={classes.cell}
 								/>
@@ -425,7 +456,7 @@ class Collection extends Component {
 								<Column
 									label="Year"
 									dataKey="year"
-									width={15}
+									width={this.state.columns.year.width}
 									flexGrow={10}
 									className={classes.cell}
 								/>
@@ -434,7 +465,7 @@ class Collection extends Component {
 								<Column
 									label="Duration"
 									dataKey="duration"
-									width={30}
+									width={this.state.columns.duration.width}
 									flexGrow={20}
 									flexShrink={0}
 									className={classes.cellRight}
@@ -445,7 +476,7 @@ class Collection extends Component {
 								<Column
 									label="BPM"
 									dataKey="bpm"
-									width={10}
+									width={this.state.columns.bpm.width}
 									flexGrow={10}
 									flexShrink={0}
 									className={classes.cell}
@@ -455,7 +486,7 @@ class Collection extends Component {
 								<Column
 									label="File Size"
 									dataKey="size"
-									width={80}
+									width={this.state.columns.size.width}
 									flexGrow={10}
 									flexShrink={0}
 									className={classes.cell}
@@ -464,9 +495,9 @@ class Collection extends Component {
 							) : null}
 							{this.state.columns.path.display ? (
 								<Column
-									label="Path TEST"
+									label="Path"
 									dataKey="path"
-									width={200}
+									width={this.state.columns.path.width}
 									flexGrow={40}
 									flexShrink={0}
 									className={classes.cell}
@@ -474,14 +505,14 @@ class Collection extends Component {
 							) : null}
 
 							{/*Column Selection Empty Column */}
-							<Column
+							{this.state.renderTableHeader ? (<Column
 								headerRenderer={this.renderColumnSelectionHeader}
 								width={15}
 								flexGrow={0}
 								flexShrink={0}
 								dataKey=""
 								className={classes.cellInLastColumn}
-							/>
+							/>) : null}
 						</Table>
 					)}
 				</AutoSizer>
