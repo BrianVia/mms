@@ -1,4 +1,4 @@
-// ts-check
+// @ts-check
 /* eslint-disable no-console */
 'use strict';
 
@@ -6,6 +6,8 @@ var util = require('util');
 var commander = require('commander');
 const http = require('http');
 const pubsub = require('pubsub-js');
+const configuration = require('./lib/configuration');
+const daemonizeProcess = require('daemonize-process');
 
 var Server = require('./api');
 const sysUI = require('./lib/sysUI');
@@ -52,6 +54,8 @@ commander.option('--profiler', 'Enable memory profiler dump');
 commander.option('--heapDump', 'Enable heap dump (require heapdump)');
 
 commander.option('--stop', 'Stop already running local MediaMonkey Server');
+commander.option('--start', 'Start the server as a service');
+commander.option('--status', 'Shows whether there\'s a server running');
 
 commander.option('-p, --httpPort <port>', 'Http port', function (v) {
 	return parseInt(v, 10);
@@ -70,22 +74,59 @@ try {
 
 //commander.garbageItems = true;
 
-function start() {
+function getStatus() {
+	return new Promise((resolve) => {
+		http.request({
+			port: configuration.getBasicConfig().httpPort,
+			path: '/api',
+			method: 'GET',
+		}, (res) => {
+			if (res.statusCode === 200)
+				resolve('running');
+			else
+				resolve('error');
+		}).on('error', () => {
+			resolve('stopped');
+		}).end();
+	});
+}
+
+async function start() {
+	if (commander.start) {
+		if (await getStatus() !== 'stopped') {
+			console.error('MediaMonkey Server is already running.');
+			return;
+		}
+		console.log('MediaMonkey Server was started as a service.');
+		daemonizeProcess({
+			arguments: process.argv.filter(arg => arg !== '--start'),
+		});
+		return;
+	}
+
 	if (commander.stop) {
 		console.log('Stopping a running MediaMonkey Server...');
 		http.request({
-			host: 'localhost',
-			port: '10222',
+			port: configuration.getBasicConfig().httpPort,
 			path: '/api/stop',
 			method: 'POST',
 		}, (res) => {
 			if (res.statusCode === 200)
 				console.log('Server successfully stopped.');
 			else
-				console.log('Server stop failed.');
+				console.warn('Server stop failed.');
 		}).on('error', () => {
-			console.log('Server not found.');
+			console.error('Server not found.');
 		}).end();
+		return;
+	}
+
+	if (commander.status) {
+		switch (await getStatus()) {
+			case 'running': console.log('1: Server is running.'); break;
+			case 'stopped': console.log('0: Server is not running.'); break;
+			case 'error': console.log('99: Server failure.'); break;
+		}
 		return;
 	}
 
