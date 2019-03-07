@@ -84,6 +84,7 @@ class Collection extends Component {
 		tracks: [],
 		headerHeight: 40,
 		displayedColumns: [],
+		renderTableHeader: false,
 		columns: {
 			title: {
 				name: "title",
@@ -135,6 +136,100 @@ class Collection extends Component {
 	collectionID = null;
 	sort = null;
 	filters = [];
+	defaultDesktopColumns = {
+		title: {
+			name: "title",
+			label: "Title",
+			display: true
+		},
+		artist: {
+			name: "artist",
+			label: "Artist",
+			display: true
+		},
+		album: {
+			name: "album",
+			label: "Album",
+			display: true
+		},
+		duration: {
+			name: "duration",
+			label: "Duration",
+			display: true
+		},
+		genre: {
+			name: "genre",
+			label: "Genre",
+			display: true
+		},
+		year: {
+			name: "year",
+			label: "Year",
+			display: true
+		},
+		bpm: {
+			name: "bpm",
+			label: "BPM",
+			display: true
+		},
+		path: {
+			name: "path",
+			label: "Path",
+			display: true
+		},
+		size: {
+			name: "size",
+			label: "Size",
+			display: true
+		}
+	};
+	defaultMobileColumns = {
+		title: {
+			name: "title",
+			label: "Title",
+			display: true
+		},
+		artist: {
+			name: "artist",
+			label: "Artist",
+			display: true
+		},
+		album: {
+			name: "album",
+			label: "Album",
+			display: true
+		},
+		duration: {
+			name: "duration",
+			label: "Duration",
+			display: false
+		},
+		genre: {
+			name: "genre",
+			label: "Genre",
+			display: false
+		},
+		year: {
+			name: "year",
+			label: "Year",
+			display: false
+		},
+		bpm: {
+			name: "bpm",
+			label: "BPM",
+			display: false
+		},
+		path: {
+			name: "path",
+			label: "Path",
+			display: false
+		},
+		size: {
+			name: "size",
+			label: "Size",
+			display: false
+		}
+	}
 
 	updateContent = () => {
 		this.setState({ tracks: [] });
@@ -155,6 +250,22 @@ class Collection extends Component {
 		this.updateContent();
 		subscribeCollectionSort(this.handleChangeSort);
 		subscribeCollectionChangeFilters(this.handleChangeFilters);
+
+		const localStorageRefColumns = localStorage.getItem('columns');
+
+		if (localStorageRefColumns) {
+			this.setState({ columns: JSON.parse(localStorageRefColumns) })
+		} else {
+			if (window.innerWidth < 768) {
+				this.setState({ columns: this.defaultMobileColumns });
+				this.setState({ renderTableHeader: false });
+				this.setState({ headerHeight: 0 });
+			} else {
+				this.setState({ columns: this.defaultDesktopColumns });
+				this.setState({ renderTableHeader: true });
+
+			}
+		}
 	};
 
 	componentDidUpdate = prevProps => {
@@ -220,13 +331,21 @@ class Collection extends Component {
 	};
 
 	updateDisplayedColumns = (newColumns) => {
+
 		this.setState({ columns: newColumns })
+		localStorage.setItem('columns', JSON.stringify(newColumns));
+
 	}
 
 	renderColumnSelectionHeader = () => {
-		return (
-			<ColumnSelection columns={this.state.columns} updateDisplayedColumns={this.updateDisplayedColumns} />
-		);
+		if (this.state.renderTableHeader) {
+			return (
+				<ColumnSelection columns={this.state.columns} updateDisplayedColumns={this.updateDisplayedColumns} />
+			);
+		} else {
+			return null;
+		}
+
 	};
 
 
@@ -247,7 +366,7 @@ class Collection extends Component {
 							height={height}
 							className={classes.table}
 							gridClassName={classes.grid}
-							disableHeader={false}
+							disableHeader={headerHeight === 0}
 							headerHeight={headerHeight}
 							rowHeight={48}
 							rowCount={this.state.tracks.length}
