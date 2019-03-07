@@ -404,7 +404,7 @@ class Collection extends Component {
 							{
 								this.state.renderTableHeader ? (
 									<Column
-										label="Artwork"
+										label=''
 										dataKey="artworkURL"
 										className={classes.cellArtwork}
 										width={48}
