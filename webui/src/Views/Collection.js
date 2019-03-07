@@ -85,6 +85,7 @@ class Collection extends Component {
 		headerHeight: 30,
 		displayedColumns: [],
 		renderTableHeader: false,
+		playingTrack: {},
 		columns: {
 			title: {
 				name: 'title',
@@ -374,9 +375,23 @@ class Collection extends Component {
 	};
 
 
-	handleTrackClick = ({ rowData, e }) => {
+	handleTrackDoubleClick = ({ rowData, e }) => {
+
 		Playback.playMediaItem(rowData);
+		this.setState({ playingTrack: rowData });
 	};
+
+	handleTrackClick = ({ event, index, rowData }) => {
+		this.setState({ selectedTrack: rowData });
+	};
+
+	renderTextCell = ({ cellData, rowData }) => {
+		if (rowData.db_id === this.state.playingTrack.db_id) {
+			return (<strong>{cellData}</strong>);
+		} else {
+			return cellData;
+		}
+	}
 
 	render() {
 		const { classes } = this.props;
@@ -397,25 +412,27 @@ class Collection extends Component {
 							rowCount={this.state.tracks.length}
 							rowGetter={({ index }) => this.state.tracks[index]}
 							rowClassName={classes.row}
+							onRowDoubleClick={this.handleTrackDoubleClick}
 							onRowClick={this.handleTrackClick}
 						>
-							{
-								this.state.renderTableHeader ? (
-									<Column
-										label="Artwork"
-										dataKey="artworkURL"
-										className={classes.cellArtwork}
-										width={48}
-										flexGrow={0}
-										flexShrink={0}
-										cellRenderer={this.renderArtwork}
-									/>
-								) : null
-							}
+
+
+							<Column
+								label="Artwork"
+								dataKey="artworkURL"
+								className={classes.cellArtwork}
+								width={48}
+								flexGrow={0}
+								flexShrink={0}
+								cellRenderer={this.renderArtwork}
+							/>
+
+
 							{this.state.columns.title.display ? (
 								<Column
 									label="Track Title"
 									dataKey="title"
+									cellRenderer={this.renderTextCell}
 									headerHeight={headerHeight}
 									className={classes.cell}
 									width={this.state.columns.title.width}
@@ -426,6 +443,7 @@ class Collection extends Component {
 								<Column
 									label="Artist"
 									dataKey="artists"
+									cellRenderer={this.renderTextCell}
 									width={this.state.columns.artist.width}
 									flexGrow={10}
 									className={classes.cell}
@@ -436,6 +454,7 @@ class Collection extends Component {
 								<Column
 									label="Album"
 									dataKey="album"
+									cellRenderer={this.renderTextCell}
 									width={this.state.columns.album.width}
 									flexGrow={10}
 									className={classes.cell}
@@ -445,6 +464,7 @@ class Collection extends Component {
 								<Column
 									label="Genre"
 									dataKey="genres"
+									cellRenderer={this.renderTextCell}
 									width={this.state.columns.genre.width}
 									flexGrow={10}
 									className={classes.cell}
@@ -454,6 +474,7 @@ class Collection extends Component {
 								<Column
 									label="Year"
 									dataKey="year"
+									cellRenderer={this.renderTextCell}
 									width={this.state.columns.year.width}
 									flexGrow={10}
 									className={classes.cell}
@@ -463,6 +484,7 @@ class Collection extends Component {
 								<Column
 									label="Duration"
 									dataKey="duration"
+									cellRenderer={this.renderTextCell}
 									width={this.state.columns.duration.width}
 									flexGrow={20}
 									flexShrink={0}
@@ -474,6 +496,7 @@ class Collection extends Component {
 								<Column
 									label="BPM"
 									dataKey="bpm"
+									cellRenderer={this.renderTextCell}
 									width={this.state.columns.bpm.width}
 									flexGrow={10}
 									flexShrink={0}
@@ -484,6 +507,7 @@ class Collection extends Component {
 								<Column
 									label="File Size"
 									dataKey="size"
+									cellRenderer={this.renderTextCell}
 									width={this.state.columns.size.width}
 									flexGrow={10}
 									flexShrink={0}
@@ -495,6 +519,7 @@ class Collection extends Component {
 								<Column
 									label="Path"
 									dataKey="path"
+									cellRenderer={this.renderTextCell}
 									width={this.state.columns.path.width}
 									flexGrow={40}
 									flexShrink={0}
