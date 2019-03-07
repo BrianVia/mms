@@ -82,7 +82,7 @@ const styles = theme => ({
 class Collection extends Component {
 	state = {
 		tracks: [],
-		headerHeight: 40,
+		headerHeight: 30,
 		displayedColumns: [],
 		renderTableHeader: false,
 		columns: {
