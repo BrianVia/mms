@@ -12,22 +12,25 @@ socket.on('new_log_item', () => {
 });
 
 var this_client_id;
-socket.on('id_assigned', (id) => {
+socket.on('id_assigned', id => {
 	this_client_id = id;
 });
 
 class Server {
 	static fetchJson = (path, options) => {
 		return new Promise((res, rej) => {
-			fetch('/api' + path, options).then((result) => {
-				return result.json();
-			}).then((json) => {
-				res(json);
-			}).catch(err => {
-				rej(err);
-			});
+			fetch('/api' + path, options)
+				.then(result => {
+					return result.json();
+				})
+				.then(json => {
+					res(json);
+				})
+				.catch(err => {
+					rej(err);
+				});
 		});
-	}
+	};
 
 	static postJson = (path, json, options) => {
 		options = options || {};
@@ -37,60 +40,70 @@ class Server {
 		});
 		options.body = JSON.stringify(json);
 		return fetch('/api' + path, options);
-	}
+	};
 
 	static deleteJson = (path, json, options) => {
 		options = options || {};
 		options.method = options.method || 'DELETE';
 		return Server.postJson(path, json, options);
-	}
+	};
 
 	static getInfo = () => {
 		return new Promise((res, rej) => {
-			if (serverInfo)
-				res(serverInfo);
+			if (serverInfo) res(serverInfo);
 
-			Server.fetchJson('/').then(json => {
-				serverInfo = json;
-				res(serverInfo);
-			}).catch(err => {
-				rej(err);
-			});
+			Server.fetchJson('/')
+				.then(json => {
+					serverInfo = json;
+					res(serverInfo);
+				})
+				.catch(err => {
+					rej(err);
+				});
 		});
-	}
+	};
 
-	static saveCongif = (cfg) => {
+	static saveCongif = cfg => {
 		Server.postJson('/', cfg).then(() => {
 			serverInfo = undefined;
 			PubSub.publish('CONFIG_CHANGE');
 			PubSub.publish('SHOW_SNACKBAR', {
 				message: 'Server configuration updated',
-				autoHide: 5000,
+				autoHide: 5000
 			});
 		});
-	}
+	};
 
-	static getFolderList = (path) => {
+	static getFolderList = path => {
 		return Server.fetchJson('/folders?path=' + path);
-	}
+	};
 
 	static getCollections = () => {
 		return Server.fetchJson('/collections');
-	}
+	};
 
-	static saveCollection = (collection) => {
+	static saveCollection = collection => {
 		Server.postJson('/collections', collection).then(() => {
 			serverInfo = undefined;
 			PubSub.publish('COLLECTIONS_CHANGE');
 		});
-	}
+	};
 
-	static deleteCollection = (collection) => {
+	static deleteCollection = collection => {
 		Server.deleteJson('/collections', collection).then(() => {
 			serverInfo = undefined;
 			PubSub.publish('COLLECTIONS_CHANGE');
 		});
+	};
+
+	static getPlaylists = () => {
+		return Server.fetchJson('/playlists');
+	};
+
+	static getPlaylistContent = (playlist_guid) => {
+		return Server.fetchJson('/playlists/' + playlist_guid);
 	}
+
 
 	static rescanCollection = (collection) => {
 		Server.postJson(`/collections/${collection.id}/rescan`);
@@ -102,89 +115,83 @@ class Server {
 
 	static getLog = (logType) => {
 		return Server.fetchJson('/log/' + (logType ? logType : 'messages'));
-	}
+	};
 
 	static getTracklist = (collectionID, sort, filters, search) => {
 		var path = '/tracks/' + collectionID;
 		var params = '';
-		if (sort)
-			params += 'sort=' + sort;
+		if (sort) params += 'sort=' + sort;
 		if (filters && filters.length > 0) {
-			if (params.length > 0)
-				params += '&';
+			if (params.length > 0) params += '&';
 			params += 'filter=' + JSON.stringify(filters);
 		}
 		if (search) {
-			if (params.length > 0)
-				params += '&';
+			if (params.length > 0) params += '&';
 			params += `search=${search}`;
 		}
-		if (params.length > 0)
-			path += '?' + params;
+		if (params.length > 0) path += '?' + params;
 		return Server.fetchJson(path);
-	}
+	};
 
 	static search = (term, sort, filters) => {
 		return Server.getTracklist(0, sort, filters, term);
-	}
+	};
 
 	static getPlayers = () => {
-		return new Promise((res) => {
-			Server.fetchJson('/players/').then((players) => {
+		return new Promise(res => {
+			Server.fetchJson('/players/').then(players => {
 				// Return all players, except this one
 				res(players.filter(player => player.id !== this_client_id));
 			});
 		});
-	}
+	};
 
 	static getMediaStreamURL = (mediaItem, params) => {
 		var forceHLS = '';
-		if (params && params.forceHLS)
-			forceHLS = '&forceHLS=true';
+		if (params && params.forceHLS) forceHLS = '&forceHLS=true';
 
-		return `/api/stream/${mediaItem.db_id}?clientId=${this_client_id}${forceHLS}`;
-	}
+		return `/api/stream/${
+			mediaItem.db_id
+		}?clientId=${this_client_id}${forceHLS}`;
+	};
 
 	static getMediaStreamInfo = (mediaItem, params) => {
 		var forceHLS = '';
-		if (params && params.forceHLS)
-			forceHLS = '?forceHLS=true';
+		if (params && params.forceHLS) forceHLS = '?forceHLS=true';
 		return Server.fetchJson(`/stream/${mediaItem.db_id}/info${forceHLS}`);
-	}
+	};
 
 	static playItem = (playerID, mediaItem) => {
-		Server.postJson('/players/' + playerID + '/play_item', mediaItem).then(() => {
-		});
-	}
+		Server.postJson('/players/' + playerID + '/play_item', mediaItem).then(
+			() => { }
+		);
+	};
 
-	static playPause = (playerID) => {
-		Server.postJson('/players/' + playerID + '/play_pause').then(() => {
-		});
-	}
+	static playPause = playerID => {
+		Server.postJson('/players/' + playerID + '/play_pause').then(() => { });
+	};
 
-	static stop = (playerID) => {
-		Server.postJson('/players/' + playerID + '/stop').then(() => {
-		});
-	}
+	static stop = playerID => {
+		Server.postJson('/players/' + playerID + '/stop').then(() => { });
+	};
 
 	static seek = (playerID, newTime) => {
-		Server.postJson(`/players/${playerID}/seek/${newTime}`).then(() => {
-		});
-	}
+		Server.postJson(`/players/${playerID}/seek/${newTime}`).then(() => { });
+	};
 
 	static updatePlaybackState = (action, mediaItem, currentTime) => {
 		socket.emit('playback', {
 			action: action,
 			mediaItem: mediaItem,
-			currentTime: currentTime,
+			currentTime: currentTime
 		});
-	}
+	};
 
 	static addEventHandler = (event, handler) => {
 		socket.on(event, function (...args) {
 			handler(...args);
 		});
-	}
+	};
 }
 
 export default Server;

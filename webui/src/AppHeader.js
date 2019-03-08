@@ -17,6 +17,7 @@ import SearchIcon from '@material-ui/icons/Search';
 import ClearIcon from '@material-ui/icons/Clear';
 import CastingButton from './Fragments/CastingButton';
 
+
 import PubSub from 'pubsub-js';
 import Server from './server';
 
@@ -24,27 +25,29 @@ import { withRouter } from 'react-router-dom';
 
 import { Route, Switch } from 'react-router-dom';
 
+
 const styles = theme => ({
-	root: {
-		width: '100%',
-		zIndex: 100,
-	},
-	expand: {
-		flex: 1,
-		display: 'flex',
-		alignItems: 'center',
-	},
-	menuButton: {
-		marginLeft: -1.5 * theme.spacing.unit,
-		marginRight: 1.5 * theme.spacing.unit,
-	},
-	toolbarItem: {
-		marginLeft: theme.spacing.unit,
-		marginRight: theme.spacing.unit,
-	},
+  root: {
+    width: "100%",
+    zIndex: 100
+  },
+  expand: {
+    flex: 1,
+    display: "flex",
+    alignItems: "center"
+  },
+  menuButton: {
+    marginLeft: -1.5 * theme.spacing.unit,
+    marginRight: 1.5 * theme.spacing.unit
+  },
+  toolbarItem: {
+    marginLeft: theme.spacing.unit,
+    marginRight: theme.spacing.unit
+  }
 });
 
 class AppHeader extends React.Component {
+  
 	state = {
 		auth: true,
 		anchorEl: null,
@@ -233,9 +236,9 @@ class AppHeader extends React.Component {
 }
 
 AppHeader.propTypes = {
-	classes: PropTypes.object.isRequired,
-	history: PropTypes.object.isRequired,
-	location: PropTypes.object.isRequired,
+  classes: PropTypes.object.isRequired,
+  history: PropTypes.object.isRequired,
+  location: PropTypes.object.isRequired
 };
 
 export default withStyles(styles)(withRouter(AppHeader));

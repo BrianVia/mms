@@ -376,7 +376,7 @@ class API extends events.EventEmitter {
 	 * @return {UPNPServer}
 	 */
 	startServer(callback) {
-		callback = callback || (() => {});
+		callback = callback || (() => { });
 
 		debug('startServer', 'Start the server');
 
@@ -500,23 +500,23 @@ class API extends events.EventEmitter {
 					if (iface.address.startsWith('192.168.0') || iface.address.startsWith('192.168.1'))
 						priority1 = iface.address;
 					else
-					if (iface.address.startsWith('10.0.0.'))
-						priority2 = iface.address;
-					else
-						priority3 = iface.address;
+						if (iface.address.startsWith('10.0.0.'))
+							priority2 = iface.address;
+						else
+							priority3 = iface.address;
 				});
 			});
 
 			if (priority1)
 				res = priority1;
 			else
-			if (priority2)
-				res = priority2;
-			else	
-			if (priority3)
-				res = priority3;
-			else
-				res = '127.0.0.1';
+				if (priority2)
+					res = priority2;
+				else
+					if (priority3)
+						res = priority3;
+					else
+						res = '127.0.0.1';
 
 			return res;
 		};

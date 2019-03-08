@@ -9,44 +9,55 @@ import Typography from "@material-ui/core/Typography";
 
 import Server from "server";
 
+import Server from 'server';
+
 const styles = {
-  card: {}
+	card: {}
 };
 
 class Collection extends Component {
-  state = {};
+	state = {
+		playlistsArray: [],
+		playlistsTree: {}
+	};
 
+	componentDidMount = () => {
+		this.getPlaylists();
+	}
 
+	getPlaylists = async () => {
+		Server.getPlaylists().then(playlists => {
+			this.setState({ playlistsArray: playlists });
+			this.transformPlaylistsArray(playlists);
+		});
+	}
 
-  componentWillMount() {
-    this.getPlaylists();
-  }
+	transformPlaylistsArray = (playlists) => {
 
-  getPlaylists = async () => {
-    let playlists = [];
-    Server.getPlaylists().then(playlists => this.setState({ playlists }));
-  }
+	}
 
-  render() {
-    const { classes } = this.props;
+	getPlaylistContent = async (playlist_guid) => {
+		return Server.getPlaylistContent(playlist_guid)
+			.then(tracks => {
+				return tracks;
+			});
+	}
 
-    return (
-      <Grid container justify="center">
-        <Grid item>
-          <Card className={classes.card}>
-            <CardHeader title="Not implemented" />
-            <CardContent>
+	render() {
+		const { classes } = this.props;
 
-            </CardContent>
-          </Card>
-        </Grid>
-      </Grid>
-    );
-  }
+		return (
+			<Grid container justify="center">
+				<Grid item>
+
+				</Grid>
+			</Grid>
+		);
+	}
 }
 
 Collection.propTypes = {
-  classes: PropTypes.object.isRequired
+	classes: PropTypes.object.isRequired
 };
 
 export default withStyles(styles)(Collection);

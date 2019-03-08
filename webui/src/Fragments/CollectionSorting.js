@@ -36,8 +36,8 @@ class CollectionSorting extends Component {
 		var sort = this.state.sort || 'title';
 
 		return (
-			<SimpleDropdown 
-				text={audioSorts[sort]} 
+			<SimpleDropdown
+				text={audioSorts[sort]}
 				open={this.state.openDrop}
 				onClick={this.handleDropdownClick}
 			>
