@@ -104,7 +104,16 @@ class Server {
 		return Server.fetchJson('/playlists/' + playlist_guid);
 	}
 
-	static getLog = logType => {
+
+	static rescanCollection = (collection) => {
+		Server.postJson(`/collections/${collection.id}/rescan`);
+		PubSub.publish('SHOW_SNACKBAR', {
+			message: `Collection ${collection.name} rescan started.`,
+			autoHide: 5000,
+		});
+	}
+
+	static getLog = (logType) => {
 		return Server.fetchJson('/log/' + (logType ? logType : 'messages'));
 	};
 

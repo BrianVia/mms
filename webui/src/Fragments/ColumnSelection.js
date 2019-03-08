@@ -1,10 +1,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { withStyles, withTheme } from '@material-ui/core/styles';
-
-
 import Input from '@material-ui/core/Input';
-// import InputLabel from '@material-ui/core/InputLabel';
 import MenuItem from '@material-ui/core/MenuItem';
 import ListItemText from '@material-ui/core/ListItemText';
 import Checkbox from '@material-ui/core/Checkbox';
@@ -76,9 +73,10 @@ class ColumnSelection extends Component {
 
 }
 
+
 ColumnSelection.propTypes = {
 	columns: PropTypes.object.isRequired,
 	classes: PropTypes.object.isRequired
 }
 
-export default withTheme()(withStyles(styles)(ColumnSelection));
+export default (ColumnSelection);

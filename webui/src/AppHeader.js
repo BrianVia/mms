@@ -54,7 +54,6 @@ class AppHeader extends React.Component {
 		serverName: '',
 		collections: [],
 		search: '',
-		
 	};
 
 	updateServerName = () => {
@@ -88,7 +87,7 @@ class AppHeader extends React.Component {
 	handleChange = (event, checked) => {
 		this.setState({ auth: checked });
 	};
-	
+
 	handleMenu = event => {
 		this.setState({ anchorEl: event.currentTarget });
 	};
