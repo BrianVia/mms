@@ -15,7 +15,7 @@ module.exports = {
         "indent": [
             "warn",
             "tab",
-            {"SwitchCase": 1}
+            { "SwitchCase": 1 }
         ],
         "linebreak-style": [
             "warn",

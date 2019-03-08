@@ -262,6 +262,7 @@ class Collection extends Component {
 	updateContent = () => {
 		this.setState({ tracks: [] });
 		if (this.props.search) {
+			console.log(this.sort);
 			Server.search(this.props.searchTerm, this.sort, this.filters).then(
 				tracklist => this.setState({ tracks: tracklist })
 			);
