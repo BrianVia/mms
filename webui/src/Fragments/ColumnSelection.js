@@ -54,7 +54,7 @@ class ColumnSelection extends Component {
 				multiple
 				onChange={this.onColumnSelectionChange}
 				input={<Input id="select-multiple-checkbox" />}
-				renderValue={selected => selected.join(", ")}
+				renderValue={selected => selected.join(', ')}
 
 			>
 				{Object.keys(this.props.columns).map(key => (
@@ -68,7 +68,7 @@ class ColumnSelection extends Component {
 				))}
 			</Select>
 
-		)
+		);
 	}
 
 }
@@ -77,6 +77,6 @@ class ColumnSelection extends Component {
 ColumnSelection.propTypes = {
 	columns: PropTypes.object.isRequired,
 	classes: PropTypes.object.isRequired
-}
+};
 
-export default (ColumnSelection);
+export default withStyles(styles)(ColumnSelection);
