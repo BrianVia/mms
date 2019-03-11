@@ -76,10 +76,6 @@ const styles = theme => ({
 	},
 	albumAvatar: {
 		margin: 4
-	},
-	DragHandleActive: {
-		color: '#0b6fcc',
-		zIndex: 3
 	}
 });
 
