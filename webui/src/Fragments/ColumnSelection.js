@@ -44,31 +44,29 @@ class ColumnSelection extends Component {
 		console.log(classes);
 
 		return (
-			<Component>
-				<Select
-					IconComponent={() =>
-						<List className={classes.listIconStyle} />
-					}
-					value={this.state.displayedColumns}
-					multiple
-					onChange={this.onColumnSelectionChange}
-					input={<Input id="select-multiple-checkbox" />}
-					renderValue={selected => selected.join(', ')}
-
-				>
-					{Object.keys(this.props.columns).map(key => (
-						<MenuItem
-							key={this.props.columns[key].name}
-							value={this.props.columns[key].display}
-						>
-							<Checkbox checked={this.props.columns[key].display} />
-							<ListItemText primary={this.props.columns[key].label} />
-						</MenuItem>
-					))}
-				</Select>
-			</Component>
 
 
+			<Select
+				IconComponent={() =>
+					<List className={classes.listIconStyle} />
+				}
+				value={this.state.displayedColumns}
+				multiple
+				onChange={this.onColumnSelectionChange}
+				input={<Input id="select-multiple-checkbox" />}
+				renderValue={selected => selected.join(', ')}
+
+			>
+				{Object.keys(this.props.columns).map(key => (
+					<MenuItem
+						key={this.props.columns[key].name}
+						value={this.props.columns[key].display}
+					>
+						<Checkbox checked={this.props.columns[key].display} />
+						<ListItemText primary={this.props.columns[key].label} />
+					</MenuItem>
+				))}
+			</Select>
 
 		);
 	}
@@ -78,8 +76,7 @@ class ColumnSelection extends Component {
 
 ColumnSelection.propTypes = {
 	columns: PropTypes.object.isRequired,
-	classes: PropTypes.object,
-	updateDisplayedColumns: PropTypes.func.isRequired
+	classes: PropTypes.object.isRequired
 };
 
-export default withStyles(ColumnSelection);
+export default withStyles(styles)(ColumnSelection);
