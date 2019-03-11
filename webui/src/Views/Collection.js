@@ -1,10 +1,11 @@
-import React, { Component } from "react";
-import PropTypes from "prop-types";
-import { withStyles } from "@material-ui/core/styles";
-import "react-virtualized/styles.css";
-import { AutoSizer } from "react-virtualized";
-import { Table, Column } from "react-virtualized";
-import Avatar from "@material-ui/core/Avatar";
+import React, { Component } from 'react';
+import PropTypes from 'prop-types';
+import { withStyles } from '@material-ui/core/styles';
+import 'react-virtualized/styles.css';
+import { AutoSizer } from 'react-virtualized';
+import { Table, Column } from 'react-virtualized';
+import Avatar from '@material-ui/core/Avatar';
+import Draggable from 'react-draggable';
 
 import Server from 'server';
 import Playback from 'playback';
@@ -79,126 +80,70 @@ const styles = theme => ({
 });
 
 class Collection extends Component {
-	state = {
-		tracks: [],
-		headerHeight: 30,
-		displayedColumns: [],
-		renderTableHeader: false,
-		playingTrack: {},
-		columns: {
-			title: {
-				name: 'title',
-				label: 'Title',
-				display: true,
-				width: 200
-			},
-			artist: {
-				name: 'artist',
-				label: 'Artist',
-				display: true,
-				width: 150
-			},
-			album: {
-				name: 'album',
-				label: 'Album',
-				display: true,
-				width: 100
-			},
-			duration: {
-				name: 'duration',
-				label: 'Duration',
-				display: true,
-				width: 20
-			},
-			genre: {
-				name: 'genre',
-				label: 'Genre',
-				display: true,
-				width: 50
-			},
-			year: {
-				name: 'year',
-				label: 'Year',
-				display: true,
-				width: 30
-			},
-			bpm: {
-				name: 'bpm',
-				label: 'BPM',
-				display: true,
-				width: 30
-			},
-			path: {
-				name: 'path',
-				label: 'Path',
-				display: false,
-				width: 40
-			},
-			size: {
-				name: 'size',
-				label: 'Size',
-				display: true,
-				width: 40
-			}
-		}
-	};
-	collectionID = null;
-	sort = null;
-	filters = [];
+
 	defaultDesktopColumns = {
 		title: {
 			name: 'title',
 			label: 'Title',
 			display: true,
-			width: 200
+			width: 100,
+			nextKey: 'artists'
 		},
-		artist: {
-			name: 'artist',
-			label: 'Artist',
+		artists: {
+			name: 'artists',
+			label: 'Artists',
 			display: true,
-			width: 150
+			width: 100,
+			nextKey: 'album'
 		},
 		album: {
 			name: 'album',
 			label: 'Album',
 			display: true,
-			width: 200
+			width: 100,
+			nextKey: 'genres'
 		},
-		duration: {
-			name: 'duration',
-			label: 'Duration',
+		genres: {
+			name: 'genres',
+			label: 'genres',
 			display: true,
-			width: 20
-		},
-		genre: {
-			name: 'genre',
-			label: 'Genre',
-			display: true,
-			width: 50
+			width: 50,
+			nextKey: 'year'
 		},
 		year: {
 			name: 'year',
 			label: 'Year',
 			display: true,
-			width: 30
+			width: 30,
+			nextKey: 'duration'
+		},
+		duration: {
+			name: 'duration',
+			label: 'Duration',
+			display: true,
+			width: 40,
+			nextKey: 'bpm'
 		},
 		bpm: {
 			name: 'bpm',
 			label: 'BPM',
 			display: true,
-			width: 30
-		},
-		path: {
-			name: 'path',
-			label: 'Path',
-			display: false,
-			width: 40
+			width: 50,
+			nextKey: 'size'
 		},
 		size: {
 			name: 'size',
 			label: 'Size',
 			display: true,
-			width: 40
+			width: 50,
+			nextKey: 'path'
+		},
+		path: {
+			name: 'path',
+			label: 'Path',
+			display: false,
+			width: 0,
+			nextKey: ''
 		}
 	};
 	defaultMobileColumns = {
@@ -206,62 +151,148 @@ class Collection extends Component {
 			name: 'title',
 			label: 'Title',
 			display: true,
-			width: 100
+			width: 100,
+			nextKey: 'artists'
 		},
-		artist: {
-			name: 'artist',
-			label: 'Artist',
+		artists: {
+			name: 'artists',
+			label: 'Artists',
 			display: true,
-			width: 100
+			width: 100,
+			nextKey: 'album'
 		},
 		album: {
 			name: 'album',
 			label: 'Album',
 			display: true,
-			width: 100
+			width: 100,
+			nextKey: 'genres'
 		},
-		duration: {
-			name: 'duration',
-			label: 'Duration',
+		genres: {
+			name: 'genres',
+			label: 'genres',
 			display: false,
-			width: 0
-		},
-		genre: {
-			name: 'genre',
-			label: 'Genre',
-			display: false,
-			width: 0
+			width: 0,
+			nextKey: 'year'
 		},
 		year: {
 			name: 'year',
 			label: 'Year',
 			display: false,
-			width: 0
+			width: 0,
+			nextKey: 'duration'
+		},
+		duration: {
+			name: 'duration',
+			label: 'Duration',
+			display: false,
+			width: 0,
+			nextKey: 'bpm'
 		},
 		bpm: {
 			name: 'bpm',
 			label: 'BPM',
 			display: false,
-			width: 0
-		},
-		path: {
-			name: 'path',
-			label: 'Path',
-			display: false,
-			width: 0
+			width: 0,
+			nextKey: 'size'
 		},
 		size: {
 			name: 'size',
 			label: 'Size',
 			display: false,
-			width: 0
+			width: 0,
+			nextKey: 'path'
+		},
+		path: {
+			name: 'path',
+			label: 'Path',
+			display: false,
+			width: 0,
+			nextKey: ''
 		}
-	}
+
+	};
+
+	state = {
+		tracks: [],
+		headerHeight: 30,
+		displayedColumns: [],
+		renderTableHeader: true,
+		playingTrack: {},
+		columns: {
+			title: {
+				name: 'title',
+				label: 'Title',
+				display: true,
+				width: 100,
+				nextKey: 'artists'
+			},
+			artists: {
+				name: 'artists',
+				label: 'Artists',
+				display: true,
+				width: 100,
+				nextKey: 'album'
+			},
+			album: {
+				name: 'album',
+				label: 'Album',
+				display: true,
+				width: 100,
+				nextKey: 'genres'
+			},
+			genres: {
+				name: 'genres',
+				label: 'genres',
+				display: true,
+				width: 50,
+				nextKey: 'year'
+			},
+			year: {
+				name: 'year',
+				label: 'Year',
+				display: true,
+				width: 30,
+				nextKey: 'duration'
+			},
+			duration: {
+				name: 'duration',
+				label: 'Duration',
+				display: true,
+				width: 40,
+				nextKey: 'bpm'
+			},
+			bpm: {
+				name: 'bpm',
+				label: 'BPM',
+				display: true,
+				width: 50,
+				nextKey: 'size'
+			},
+			size: {
+				name: 'size',
+				label: 'Size',
+				display: true,
+				width: 50,
+				nextKey: 'path'
+			},
+			path: {
+				name: 'path',
+				label: 'Path',
+				display: false,
+				width: 0,
+				nextKey: ''
+			}
+		}
+	};
+	collectionID = null;
+	sort = null;
+	filters = [];
+
 
 	updateContent = () => {
 		this.setState({ tracks: [] });
 		if (this.props.search) {
-			console.log(this.sort);
 			Server.search(this.props.searchTerm, this.sort, this.filters).then(
 				tracklist => this.setState({ tracks: tracklist })
 			);
@@ -279,7 +310,7 @@ class Collection extends Component {
 		subscribeCollectionSort(this.handleChangeSort);
 		subscribeCollectionChangeFilters(this.handleChangeFilters);
 
-		const localStorageRefColumns = localStorage.getItem('columns');
+		const localStorageRefColumns = false;//localStorage.getItem('columns');
 
 		if (localStorageRefColumns) {
 			this.setState({ columns: JSON.parse(localStorageRefColumns) });
@@ -291,13 +322,14 @@ class Collection extends Component {
 			} else {
 				this.setState({ columns: this.defaultDesktopColumns });
 				this.setState({ renderTableHeader: true });
-
 			}
 		}
 
 		if (Playback.getActive()) {
 			this.setState({ playingTrack: Playback.getCurrentMediaItem() });
 		}
+
+		// console.log(this.state.columns.artists.display);
 	};
 
 	componentDidUpdate = prevProps => {
@@ -350,7 +382,7 @@ class Collection extends Component {
 			return (
 				<img
 					src={rowData.artworkURL}
-					alt="artwork"
+					alt='artwork'
 					className={this.props.classes.artwork}
 				/>
 			);
@@ -365,7 +397,7 @@ class Collection extends Component {
 	updateDisplayedColumns = (newColumns) => {
 		this.setState({ columns: newColumns });
 		localStorage.setItem('columns', JSON.stringify(newColumns));
-	}
+	};
 
 	renderColumnSelectionHeader = () => {
 		if (this.state.renderTableHeader) {
@@ -375,7 +407,55 @@ class Collection extends Component {
 		} else {
 			return null;
 		}
+	};
 
+	renderDraggableHeader = ({
+		columnData,
+		dataKey,
+		disableSort,
+		label,
+		sortBy,
+		sortDirection
+	}) => {
+		return (
+			<React.Fragment key={dataKey}>
+				<div className='ReactVirtualized__Table__headerTruncatedText'>
+					{label}
+				</div>
+				<Draggable
+					axis='x'
+					defaultClassName='DragHandle'
+					defaultClassNameDragging='DragHandleActive'
+					onDrag={(event, { deltaX }) =>
+						this.resizeRow({
+							event,
+							dataKey,
+							deltaX
+						})
+					}
+					position={{ x: 0 }}
+					zIndex={999}
+				>
+					<span className='DragHandleIcon'>⋮</span>
+				</Draggable>
+			</React.Fragment>
+		);
+	};
+
+	resizeRow = ({ event, dataKey, deltaX }) => {
+		console.log(event);
+		console.log('dataKey: ' + dataKey + '\ndeltaX: ' + deltaX);
+		this.setState(prevState => {
+			const columns = prevState.columns;
+			let newColumns = columns;
+			newColumns[dataKey].width = columns[dataKey].width + deltaX;
+			newColumns[newColumns[dataKey].nextKey] = columns[columns[dataKey].nextKey].width - deltaX;
+
+			return {
+				columns: newColumns
+			};
+
+		});
 	};
 
 
@@ -423,8 +503,9 @@ class Collection extends Component {
 
 
 							<Column
-								label="Artwork"
-								dataKey="artworkURL"
+								label='Artwork'
+								dataKey='artworkURL'
+
 								className={classes.cellArtwork}
 								width={48}
 								flexGrow={0}
@@ -435,21 +516,23 @@ class Collection extends Component {
 
 							{this.state.columns.title.display ? (
 								<Column
-									label="Track Title"
-									dataKey="title"
+									label='Track Title'
+									dataKey='title'
 									cellRenderer={this.renderTextCell}
+									headerRenderer={this.renderDraggableHeader}
 									headerHeight={headerHeight}
 									className={classes.cell}
 									width={this.state.columns.title.width}
 									flexGrow={10}
 								/>
 							) : null}
-							{this.state.columns.artist.display ? (
+							{this.state.columns.artists.display ? (
 								<Column
-									label="Artist"
-									dataKey="artists"
+									label={this.state.columns.artists.label}
+									dataKey='artists'
 									cellRenderer={this.renderTextCell}
-									width={this.state.columns.artist.width}
+									headerRenderer={this.renderDraggableHeader}
+									width={this.state.columns.artists.width}
 									flexGrow={10}
 									className={classes.cell}
 									cellDataGetter={this.getArtistCellData}
@@ -457,29 +540,32 @@ class Collection extends Component {
 							) : null}
 							{this.state.columns.album.display ? (
 								<Column
-									label="Album"
-									dataKey="album"
+									label='Album'
+									dataKey='album'
 									cellRenderer={this.renderTextCell}
+									headerRenderer={this.renderDraggableHeader}
 									width={this.state.columns.album.width}
 									flexGrow={10}
 									className={classes.cell}
 								/>
 							) : null}
-							{this.state.columns.genre.display ? (
+							{this.state.columns.genres.display ? (
 								<Column
-									label="Genre"
-									dataKey="genres"
+									label='genres'
+									dataKey='genres'
 									cellRenderer={this.renderTextCell}
-									width={this.state.columns.genre.width}
+									headerRenderer={this.renderDraggableHeader}
+									width={this.state.columns.genres.width}
 									flexGrow={10}
 									className={classes.cell}
 								/>
 							) : null}
 							{this.state.columns.year.display ? (
 								<Column
-									label="Year"
-									dataKey="year"
+									label='Year'
+									dataKey='year'
 									cellRenderer={this.renderTextCell}
+									headerRenderer={this.renderDraggableHeader}
 									width={this.state.columns.year.width}
 									flexGrow={10}
 									className={classes.cell}
@@ -487,9 +573,10 @@ class Collection extends Component {
 							) : null}
 							{this.state.columns.duration.display ? (
 								<Column
-									label="Duration"
-									dataKey="duration"
+									label='Duration'
+									dataKey='duration'
 									cellRenderer={this.renderTextCell}
+									headerRenderer={this.renderDraggableHeader}
 									width={this.state.columns.duration.width}
 									flexGrow={20}
 									flexShrink={0}
@@ -499,9 +586,10 @@ class Collection extends Component {
 							) : null}
 							{this.state.columns.bpm.display ? (
 								<Column
-									label="BPM"
-									dataKey="bpm"
+									label='BPM'
+									dataKey='bpm'
 									cellRenderer={this.renderTextCell}
+									headerRenderer={this.renderDraggableHeader}
 									width={this.state.columns.bpm.width}
 									flexGrow={10}
 									flexShrink={0}
@@ -510,9 +598,10 @@ class Collection extends Component {
 							) : null}
 							{this.state.columns.size.display ? (
 								<Column
-									label="File Size"
-									dataKey="size"
+									label='File Size'
+									dataKey='size'
 									cellRenderer={this.renderTextCell}
+									headerRenderer={this.renderDraggableHeader}
 									width={this.state.columns.size.width}
 									flexGrow={10}
 									flexShrink={0}
@@ -522,9 +611,10 @@ class Collection extends Component {
 							) : null}
 							{this.state.columns.path.display ? (
 								<Column
-									label="Path"
-									dataKey="path"
+									label='Path'
+									dataKey='path'
 									cellRenderer={this.renderTextCell}
+									headerRenderer={this.renderDraggableHeader}
 									width={this.state.columns.path.width}
 									flexGrow={40}
 									flexShrink={0}
@@ -538,7 +628,7 @@ class Collection extends Component {
 								width={45}
 								flexGrow={0}
 								flexShrink={0}
-								dataKey=""
+								dataKey=''
 								className={classes.cell}
 							/>) : null}
 						</Table>
