@@ -121,7 +121,7 @@ class Collection extends Component {
 			name: 'duration',
 			label: 'Duration',
 			display: true,
-			width: 40,
+			width: 15,
 			nextKey: 'bpm'
 		},
 		bpm: {
@@ -219,75 +219,12 @@ class Collection extends Component {
 		displayedColumns: [],
 		renderTableHeader: true,
 		playingTrack: {},
-		columns: {
-			title: {
-				name: 'title',
-				label: 'Title',
-				display: true,
-				width: 100,
-				nextKey: 'artists'
-			},
-			artists: {
-				name: 'artists',
-				label: 'Artists',
-				display: true,
-				width: 100,
-				nextKey: 'album'
-			},
-			album: {
-				name: 'album',
-				label: 'Album',
-				display: true,
-				width: 100,
-				nextKey: 'genres'
-			},
-			genres: {
-				name: 'genres',
-				label: 'genres',
-				display: true,
-				width: 50,
-				nextKey: 'year'
-			},
-			year: {
-				name: 'year',
-				label: 'Year',
-				display: true,
-				width: 30,
-				nextKey: 'duration'
-			},
-			duration: {
-				name: 'duration',
-				label: 'Duration',
-				display: true,
-				width: 40,
-				nextKey: 'bpm'
-			},
-			bpm: {
-				name: 'bpm',
-				label: 'BPM',
-				display: true,
-				width: 50,
-				nextKey: 'size'
-			},
-			size: {
-				name: 'size',
-				label: 'Size',
-				display: true,
-				width: 50,
-				nextKey: 'path'
-			},
-			path: {
-				name: 'path',
-				label: 'Path',
-				display: false,
-				width: 0,
-				nextKey: ''
-			}
-		}
+		columns: this.defaultDesktopColumns
 	};
 	collectionID = null;
 	sort = null;
 	filters = [];
+	minWidth: 5;
 
 
 	updateContent = () => {
@@ -449,7 +386,7 @@ class Collection extends Component {
 			const columns = prevState.columns;
 			let newColumns = columns;
 			newColumns[dataKey].width = columns[dataKey].width + deltaX;
-			newColumns[newColumns[dataKey].nextKey] = columns[columns[dataKey].nextKey].width - deltaX;
+			newColumns[newColumns[dataKey].nextKey].width = Math.max(columns[columns[dataKey].nextKey].width - deltaX, this.minWidth);
 
 			return {
 				columns: newColumns
@@ -524,6 +461,7 @@ class Collection extends Component {
 									className={classes.cell}
 									width={this.state.columns.title.width}
 									flexGrow={10}
+									flexShrink={20}
 								/>
 							) : null}
 							{this.state.columns.artists.display ? (
@@ -534,6 +472,7 @@ class Collection extends Component {
 									headerRenderer={this.renderDraggableHeader}
 									width={this.state.columns.artists.width}
 									flexGrow={10}
+									flexShrink={20}
 									className={classes.cell}
 									cellDataGetter={this.getArtistCellData}
 								/>
@@ -546,6 +485,7 @@ class Collection extends Component {
 									headerRenderer={this.renderDraggableHeader}
 									width={this.state.columns.album.width}
 									flexGrow={10}
+									flexShrink={20}
 									className={classes.cell}
 								/>
 							) : null}
@@ -557,6 +497,7 @@ class Collection extends Component {
 									headerRenderer={this.renderDraggableHeader}
 									width={this.state.columns.genres.width}
 									flexGrow={10}
+									flexShrink={20}
 									className={classes.cell}
 								/>
 							) : null}
@@ -568,6 +509,7 @@ class Collection extends Component {
 									headerRenderer={this.renderDraggableHeader}
 									width={this.state.columns.year.width}
 									flexGrow={10}
+									flexShrink={20}
 									className={classes.cell}
 								/>
 							) : null}
@@ -579,7 +521,7 @@ class Collection extends Component {
 									headerRenderer={this.renderDraggableHeader}
 									width={this.state.columns.duration.width}
 									flexGrow={20}
-									flexShrink={0}
+									flexShrink={20}
 									className={classes.cellRight}
 									cellDataGetter={this.getDurationCellData}
 								/>
@@ -592,7 +534,7 @@ class Collection extends Component {
 									headerRenderer={this.renderDraggableHeader}
 									width={this.state.columns.bpm.width}
 									flexGrow={10}
-									flexShrink={0}
+									flexShrink={20}
 									className={classes.cell}
 								/>
 							) : null}
@@ -604,7 +546,7 @@ class Collection extends Component {
 									headerRenderer={this.renderDraggableHeader}
 									width={this.state.columns.size.width}
 									flexGrow={10}
-									flexShrink={0}
+									flexShrink={20}
 									className={classes.cell}
 									cellDataGetter={this.getFileSizeCellData}
 								/>
@@ -617,7 +559,7 @@ class Collection extends Component {
 									headerRenderer={this.renderDraggableHeader}
 									width={this.state.columns.path.width}
 									flexGrow={40}
-									flexShrink={0}
+									flexShrink={20}
 									className={classes.cell}
 								/>
 							) : null}
