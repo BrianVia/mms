@@ -76,6 +76,10 @@ const styles = theme => ({
 	},
 	albumAvatar: {
 		margin: 4
+	},
+	DragHandleActive: {
+		color: '#0b6fcc',
+		zIndex: 3
 	}
 });
 
@@ -247,7 +251,7 @@ class Collection extends Component {
 		subscribeCollectionSort(this.handleChangeSort);
 		subscribeCollectionChangeFilters(this.handleChangeFilters);
 
-		const localStorageRefColumns = false;//localStorage.getItem('columns');
+		const localStorageRefColumns = localStorage.getItem('columnsConfig-' + this.collectionID);
 
 		if (localStorageRefColumns) {
 			this.setState({ columns: JSON.parse(localStorageRefColumns) });
@@ -333,7 +337,8 @@ class Collection extends Component {
 
 	updateDisplayedColumns = (newColumns) => {
 		this.setState({ columns: newColumns });
-		localStorage.setItem('columns', JSON.stringify(newColumns));
+
+		localStorage.setItem('columnsConfig-' + this.collectionID, JSON.stringify(newColumns));
 	};
 
 	renderColumnSelectionHeader = () => {
@@ -380,13 +385,11 @@ class Collection extends Component {
 	};
 
 	resizeRow = ({ event, dataKey, deltaX }) => {
-		console.log(event);
-		console.log('dataKey: ' + dataKey + '\ndeltaX: ' + deltaX);
 		this.setState(prevState => {
 			const columns = prevState.columns;
 			let newColumns = columns;
 			newColumns[dataKey].width = columns[dataKey].width + deltaX;
-			newColumns[newColumns[dataKey].nextKey].width = Math.max(columns[columns[dataKey].nextKey].width - deltaX, this.minWidth);
+			newColumns[newColumns[dataKey].nextKey].width = columns[columns[dataKey].nextKey].width - deltaX;
 
 			return {
 				columns: newColumns
