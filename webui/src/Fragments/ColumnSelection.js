@@ -10,14 +10,15 @@ import List from '@material-ui/icons/List';
 
 const styles = theme => ({
 	width: '50px',
+	selectStyle: {},
 	listIconStyle: {
 		position: 'absolute',
-		top: '0',
-		right: '0',
+		top: '-4px',
+		left: '1px',
 		display: 'inline-block',
-		color: '#000',
-		width: '40px',
-		height: '40px',
+		color: 'lightgrey',
+		width: '35px',
+		height: '35px',
 		pointerEvents: 'none',
 	}
 
@@ -50,6 +51,7 @@ class ColumnSelection extends Component {
 				IconComponent={() =>
 					<List className={classes.listIconStyle} />
 				}
+				className={classes.selectStyle}
 				value={this.state.displayedColumns}
 				multiple
 				onChange={this.onColumnSelectionChange}
