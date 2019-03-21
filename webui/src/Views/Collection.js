@@ -395,15 +395,10 @@ class Collection extends Component {
 	};
 
 
-	handleTrackDoubleClick = ({ rowData, e }) => {
-		Playback.playMediaItem(rowData);
-		this.setState({ playingTrack: rowData });
-		this.setState({ selectedTrack: rowData });
-	};
-
 	handleTrackClick = ({ event, index, rowData }) => {
 		//@TODO implement track list selection
-		this.setState({ selectedTrack: rowData });
+		Playback.playMediaItem(rowData);
+		this.setState({ playingTrack: rowData });
 	};
 
 	renderTextCell = ({ cellData, rowData }) => {
@@ -433,7 +428,6 @@ class Collection extends Component {
 							rowCount={this.state.tracks.length}
 							rowGetter={({ index }) => this.state.tracks[index]}
 							rowClassName={classes.row}
-							onRowDoubleClick={this.handleTrackDoubleClick}
 							onRowClick={this.handleTrackClick}
 						>
 
@@ -455,7 +449,6 @@ class Collection extends Component {
 									label='Track Title'
 									dataKey='title'
 									cellRenderer={this.renderTextCell}
-									headerRenderer={this.renderDraggableHeader}
 									headerHeight={headerHeight}
 									className={classes.cell}
 									width={this.state.columns.title.width}
@@ -468,7 +461,6 @@ class Collection extends Component {
 									label={this.state.columns.artists.label}
 									dataKey='artists'
 									cellRenderer={this.renderTextCell}
-									headerRenderer={this.renderDraggableHeader}
 									width={this.state.columns.artists.width}
 									flexGrow={10}
 									flexShrink={20}
@@ -481,7 +473,6 @@ class Collection extends Component {
 									label='Album'
 									dataKey='album'
 									cellRenderer={this.renderTextCell}
-									headerRenderer={this.renderDraggableHeader}
 									width={this.state.columns.album.width}
 									flexGrow={10}
 									flexShrink={20}
@@ -493,7 +484,6 @@ class Collection extends Component {
 									label='genres'
 									dataKey='genres'
 									cellRenderer={this.renderTextCell}
-									headerRenderer={this.renderDraggableHeader}
 									width={this.state.columns.genres.width}
 									flexGrow={10}
 									flexShrink={20}
@@ -505,7 +495,6 @@ class Collection extends Component {
 									label='Year'
 									dataKey='year'
 									cellRenderer={this.renderTextCell}
-									headerRenderer={this.renderDraggableHeader}
 									width={this.state.columns.year.width}
 									flexGrow={10}
 									flexShrink={20}
@@ -517,7 +506,6 @@ class Collection extends Component {
 									label='Duration'
 									dataKey='duration'
 									cellRenderer={this.renderTextCell}
-									headerRenderer={this.renderDraggableHeader}
 									width={this.state.columns.duration.width}
 									flexGrow={20}
 									flexShrink={20}
@@ -530,7 +518,6 @@ class Collection extends Component {
 									label='BPM'
 									dataKey='bpm'
 									cellRenderer={this.renderTextCell}
-									headerRenderer={this.renderDraggableHeader}
 									width={this.state.columns.bpm.width}
 									flexGrow={10}
 									flexShrink={20}
@@ -542,7 +529,6 @@ class Collection extends Component {
 									label='File Size'
 									dataKey='size'
 									cellRenderer={this.renderTextCell}
-									headerRenderer={this.renderDraggableHeader}
 									width={this.state.columns.size.width}
 									flexGrow={10}
 									flexShrink={20}
@@ -555,7 +541,6 @@ class Collection extends Component {
 									label='Path'
 									dataKey='path'
 									cellRenderer={this.renderTextCell}
-									headerRenderer={this.renderDraggableHeader}
 									width={this.state.columns.path.width}
 									flexGrow={40}
 									flexShrink={20}

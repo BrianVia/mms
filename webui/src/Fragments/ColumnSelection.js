@@ -34,16 +34,10 @@ class ColumnSelection extends Component {
 		let newColumns = this.props.columns;
 		newColumns[child.key].display = !newColumns[child.key].display;
 		this.props.updateDisplayedColumns(newColumns);
-	};
-
-	componentDidMount = () => {
-		console.log(this.props);
 	}
 
 	render() {
 		const { classes } = this.props;
-		console.log(classes);
-
 		return (
 
 
