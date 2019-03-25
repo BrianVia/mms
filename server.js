@@ -7,12 +7,17 @@ var commander = require('commander');
 const http = require('http');
 const pubsub = require('pubsub-js');
 const configuration = require('./lib/configuration');
+const mediaProvider = require('./lib/mediaProvider');
 const daemonizeProcess = require('daemonize-process');
+// @ts-ignore
+const pjson = require('./package.json');
 
 var Server = require('./api');
 const sysUI = require('./lib/sysUI');
 
 var directories = [];
+
+commander.version(pjson.version, '-v, --version');
 
 commander.option('-d, --directory <path>', 'Mount directory', function (path) {
 	var mountPoint = null;
@@ -56,6 +61,7 @@ commander.option('--heapDump', 'Enable heap dump (require heapdump)');
 commander.option('--stop', 'Stop already running local MediaMonkey Server');
 commander.option('--start', 'Start the server as a service');
 commander.option('--status', 'Shows whether there\'s a server running');
+commander.option('--datafolder', 'Sets data directory (where database and config files are stored)');
 
 commander.option('-p, --httpPort <port>', 'Http port', function (v) {
 	return parseInt(v, 10);
@@ -91,7 +97,52 @@ function getStatus() {
 	});
 }
 
+function initDB() {
+	return new Promise((resolve) => {		
+		var RegistryClass = require('./lib/db/sqlRegistry');
+		var db = new RegistryClass();
+		db.initialize((error) => {
+			if (error) {
+				console.error('Unable to load database: ' + error);
+				resolve();
+			} else
+				configuration.setRegistry(db, () => {
+					mediaProvider.setRegistry(db);		
+					resolve(db);							
+				});
+		});
+	});
+}
+
+function loadConfig() {
+	return new Promise((resolve) => {		
+		configuration.loadConfig((err, config)=>{
+			if (err) {
+				console.error('Unable to load configuration: ' + err);
+				resolve();
+			} else {
+				resolve(config);
+			}
+		});
+	});
+}
+
 async function start() {
+
+	if (commander.datafolder) {
+		var dir = process.argv.pop();
+		if (dir == '--datafolder') {
+			console.error('--datafolder requires one parameter (folder path)');
+			return;
+		}
+		console.log('Setting custom data directory: ' + dir);
+		configuration.setDataDir(dir);
+	}
+
+	var config = await loadConfig();
+	if (!config)
+		return;
+
 	if (commander.start) {
 		if (await getStatus() !== 'stopped') {
 			console.error('MediaMonkey Server is already running.');
@@ -130,6 +181,10 @@ async function start() {
 		return;
 	}
 
+	var db = await initDB();
+	if (!db)
+		return;	
+
 	// Create an UpnpServer with options
 
 	var server = new Server(commander, directories);
@@ -150,7 +205,7 @@ async function start() {
 		console.log('disconnecting...');
 		stopped = true;
 
-		server.stop();
+		server.stop(() => {});
 
 		setTimeout(function () {
 			process.exit();
@@ -170,10 +225,7 @@ async function start() {
 			process.exit(0);
 			return;
 		}
-		if (err == 'SIGINT')
-			pubsub.publishSync('APP_END');
-		else
-			console.error('Caught exception: ' + err);
+		console.error('Caught exception: ' + err);
 	});
 
 	// Try to profile upnpserver manually !
