@@ -14,6 +14,8 @@ const restRouter = require('./lib/api/rest');
 const clients = require('./lib/clients');
 const os = require('os');
 const sysUI = require('./lib/sysUI');
+// @ts-ignore
+const pjson = require('./package.json');
 
 const debug = require('debug')('upnpserver:api');
 const logger = require('./lib/logger');
@@ -35,7 +37,17 @@ class API extends events.EventEmitter {
 	constructor(configuration, paths) {
 		super();
 
-		this.configuration = Object.assign({}, this.defaultConfiguration, configuration);
+		var config = Configuration.getBasicConfig();
+		this.configuration = {
+			'dlnaSupport': true,
+			'httpPort': config.httpPort,
+			'name': config.serverName,
+			// @ts-ignore
+			'version': require('./package.json').version
+		};		
+		this.configuration = Object.assign({}, this.configuration, configuration);
+
+
 		this.repositories = [];
 		this._upnpClasses = {};
 		this._contentHandlers = [];
@@ -64,21 +76,6 @@ class API extends events.EventEmitter {
 		} else if (util.isArray(cf)) {
 			cf.forEach((c) => this.loadConfiguration(require(c)));
 		}
-	}
-
-	/**
-	 * Default server configuration.
-	 *
-	 * @type {object}
-	 */
-	get defaultConfiguration() {
-		return {
-			'dlnaSupport': true,
-			'httpPort': 10222,
-			'name': 'Node Server',
-			// @ts-ignore
-			'version': require('./package.json').version
-		};
 	}
 
 	/**
@@ -424,7 +421,7 @@ class API extends events.EventEmitter {
 			udn: this.upnpServer.uuid,
 			location: {
 				port: this.configuration.httpPort,
-				path: '/description.xml'
+				path: '/DeviceDescription.xml'
 			},
 			sourcePort: 1900, // is needed for SSDP multicast to work correctly (issue #75 of node-ssdp)
 			explicitSocketBind: true, // might be needed for multiple NICs (issue #34 of node-ssdp)
@@ -499,24 +496,27 @@ class API extends events.EventEmitter {
 
 					if (iface.address.startsWith('192.168.0') || iface.address.startsWith('192.168.1'))
 						priority1 = iface.address;
-					else
+					else {
 						if (iface.address.startsWith('10.0.0.'))
 							priority2 = iface.address;
 						else
 							priority3 = iface.address;
+					}
 				});
 			});
 
 			if (priority1)
 				res = priority1;
-			else
+			else {
 				if (priority2)
 					res = priority2;
-				else
+				else {
 					if (priority3)
 						res = priority3;
 					else
 						res = '127.0.0.1';
+				}
+			}
 
 			return res;
 		};
@@ -530,13 +530,13 @@ class API extends events.EventEmitter {
 
 			this.emit('waiting');
 
-			var address = httpServer.address();
+			const address = httpServer.address();
 
 			debug('_upnpServerStarted', 'Http server is listening on address=', address);
 
 			logger.info('==================================================');
-			// @ts-ignore
-			logger.info(`Running at http://${getLocalIP()}:${address.port} (or http://localhost:${address.port})`);
+			// @ts-ignore (address.port not known)
+			logger.info(`MMS v${pjson.version} running at http://${getLocalIP()}:${address.port} (or http://localhost:${address.port})`);
 			logger.info('Connect using a web browser or using MediaMonkey 5.');
 			logger.info('==================================================');
 
