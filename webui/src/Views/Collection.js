@@ -105,7 +105,7 @@ class Collection extends Component {
 		},
 		genres: {
 			name: 'genres',
-			label: 'genres',
+			label: 'Genres',
 			display: true,
 			width: 50,
 			nextKey: 'year'
@@ -170,7 +170,7 @@ class Collection extends Component {
 		},
 		genres: {
 			name: 'genres',
-			label: 'genres',
+			label: 'Genres',
 			display: false,
 			width: 0,
 			nextKey: 'year'
@@ -224,7 +224,7 @@ class Collection extends Component {
 	collectionID = null;
 	sort = null;
 	filters = [];
-	minWidth: 5;
+	minWidth= 5;
 
 
 	updateContent = () => {
@@ -338,6 +338,7 @@ class Collection extends Component {
 	};
 
 	renderColumnSelectionHeader = () => {
+		console.log(this.state.columns);
 		if (this.state.renderTableHeader) {
 			return (
 				<ColumnSelection columns={this.state.columns} updateDisplayedColumns={this.updateDisplayedColumns} />
@@ -437,7 +438,7 @@ class Collection extends Component {
 								dataKey='artworkURL'
 
 								className={classes.cellArtwork}
-								width={48}
+								width={60}
 								flexGrow={0}
 								flexShrink={0}
 								cellRenderer={this.renderArtwork}
@@ -481,7 +482,7 @@ class Collection extends Component {
 							) : null}
 							{this.state.columns.genres.display ? (
 								<Column
-									label='genres'
+									label='Genres'
 									dataKey='genres'
 									cellRenderer={this.renderTextCell}
 									width={this.state.columns.genres.width}
@@ -509,7 +510,7 @@ class Collection extends Component {
 									width={this.state.columns.duration.width}
 									flexGrow={20}
 									flexShrink={20}
-									className={classes.cellRight}
+									className={classes.cell}
 									cellDataGetter={this.getDurationCellData}
 								/>
 							) : null}
