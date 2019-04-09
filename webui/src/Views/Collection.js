@@ -76,142 +76,87 @@ const styles = theme => ({
 	},
 	albumAvatar: {
 		margin: 4
-	}
+	},
+
 });
 
 class Collection extends Component {
 
 	defaultDesktopColumns = {
+		artworkURL: {
+			dataKey: 'artWorkURL',
+			label: 'Artwork',
+			display: true,
+			width: 100,
+			cellRenderer: this.renderArtwork
+
+		},
 		title: {
-			name: 'title',
+			dataKey: 'title',
 			label: 'Title',
 			display: true,
 			width: 100,
-			nextKey: 'artists'
+			cellRenderer: this.renderTextCell
 		},
 		artists: {
-			name: 'artists',
+			dataKey: 'artists',
 			label: 'Artists',
 			display: true,
 			width: 100,
-			nextKey: 'album'
+			cellRenderer: this.renderTextCell
+
 		},
 		album: {
-			name: 'album',
+			dataKey: 'album',
 			label: 'Album',
 			display: true,
 			width: 100,
-			nextKey: 'genres'
+			cellRenderer: this.renderTextCell
 		},
 		genres: {
-			name: 'genres',
+			dataKey: 'genres',
 			label: 'genres',
 			display: true,
 			width: 50,
-			nextKey: 'year'
+			cellRenderer: this.renderTextCell
 		},
 		year: {
-			name: 'year',
+			dataKey: 'year',
 			label: 'Year',
 			display: true,
 			width: 30,
-			nextKey: 'duration'
+			cellRenderer: this.renderTextCell
 		},
 		duration: {
-			name: 'duration',
+			dataKey: 'duration',
 			label: 'Duration',
 			display: true,
 			width: 15,
-			nextKey: 'bpm'
+			cellRenderer: this.renderTextCell
 		},
 		bpm: {
-			name: 'bpm',
+			dataKey: 'bpm',
 			label: 'BPM',
 			display: true,
 			width: 50,
-			nextKey: 'size'
+			cellRenderer: this.renderTextCell
 		},
 		size: {
-			name: 'size',
+			dataKey: 'size',
 			label: 'Size',
 			display: true,
 			width: 50,
-			nextKey: 'path'
+			cellRenderer: this.renderTextCell
 		},
 		path: {
-			name: 'path',
+			dataKey: 'path',
 			label: 'Path',
 			display: false,
 			width: 0,
-			nextKey: ''
+			cellRenderer: this.renderTextCell
 		}
 	};
-	defaultMobileColumns = {
-		title: {
-			name: 'title',
-			label: 'Title',
-			display: true,
-			width: 100,
-			nextKey: 'artists'
-		},
-		artists: {
-			name: 'artists',
-			label: 'Artists',
-			display: true,
-			width: 100,
-			nextKey: 'album'
-		},
-		album: {
-			name: 'album',
-			label: 'Album',
-			display: true,
-			width: 100,
-			nextKey: 'genres'
-		},
-		genres: {
-			name: 'genres',
-			label: 'genres',
-			display: false,
-			width: 0,
-			nextKey: 'year'
-		},
-		year: {
-			name: 'year',
-			label: 'Year',
-			display: false,
-			width: 0,
-			nextKey: 'duration'
-		},
-		duration: {
-			name: 'duration',
-			label: 'Duration',
-			display: false,
-			width: 0,
-			nextKey: 'bpm'
-		},
-		bpm: {
-			name: 'bpm',
-			label: 'BPM',
-			display: false,
-			width: 0,
-			nextKey: 'size'
-		},
-		size: {
-			name: 'size',
-			label: 'Size',
-			display: false,
-			width: 0,
-			nextKey: 'path'
-		},
-		path: {
-			name: 'path',
-			label: 'Path',
-			display: false,
-			width: 0,
-			nextKey: ''
-		}
-
-	};
+	defaultMobileColumns = {};
 
 	state = {
 		tracks: [],
@@ -409,9 +354,24 @@ class Collection extends Component {
 		}
 	}
 
+	renderDynamicColumns = () => {
+		const { columns } = this.state;
+		const { headerHeight } = this.state;
+		const tableColumns = [];
+		for (const column in columns) {
+			tableColumns.push(
+				<Column
+					width={column.width}
+					headerHeight={headerHeight}
+				>
+				</Column>);
+		}
+	}
+
 	render() {
 		const { classes } = this.props;
 		const { headerHeight } = this.state;
+		const { columns } = this.state;
 
 		return (
 			<div className={classes.root}>
@@ -443,110 +403,8 @@ class Collection extends Component {
 								cellRenderer={this.renderArtwork}
 							/>
 
+							{this.renderDynamicColumns()}
 
-							{this.state.columns.title.display ? (
-								<Column
-									label='Track Title'
-									dataKey='title'
-									cellRenderer={this.renderTextCell}
-									headerHeight={headerHeight}
-									className={classes.cell}
-									width={this.state.columns.title.width}
-									flexGrow={10}
-									flexShrink={20}
-								/>
-							) : null}
-							{this.state.columns.artists.display ? (
-								<Column
-									label={this.state.columns.artists.label}
-									dataKey='artists'
-									cellRenderer={this.renderTextCell}
-									width={this.state.columns.artists.width}
-									flexGrow={10}
-									flexShrink={20}
-									className={classes.cell}
-									cellDataGetter={this.getArtistCellData}
-								/>
-							) : null}
-							{this.state.columns.album.display ? (
-								<Column
-									label='Album'
-									dataKey='album'
-									cellRenderer={this.renderTextCell}
-									width={this.state.columns.album.width}
-									flexGrow={10}
-									flexShrink={20}
-									className={classes.cell}
-								/>
-							) : null}
-							{this.state.columns.genres.display ? (
-								<Column
-									label='genres'
-									dataKey='genres'
-									cellRenderer={this.renderTextCell}
-									width={this.state.columns.genres.width}
-									flexGrow={10}
-									flexShrink={20}
-									className={classes.cell}
-								/>
-							) : null}
-							{this.state.columns.year.display ? (
-								<Column
-									label='Year'
-									dataKey='year'
-									cellRenderer={this.renderTextCell}
-									width={this.state.columns.year.width}
-									flexGrow={10}
-									flexShrink={20}
-									className={classes.cell}
-								/>
-							) : null}
-							{this.state.columns.duration.display ? (
-								<Column
-									label='Duration'
-									dataKey='duration'
-									cellRenderer={this.renderTextCell}
-									width={this.state.columns.duration.width}
-									flexGrow={20}
-									flexShrink={20}
-									className={classes.cellRight}
-									cellDataGetter={this.getDurationCellData}
-								/>
-							) : null}
-							{this.state.columns.bpm.display ? (
-								<Column
-									label='BPM'
-									dataKey='bpm'
-									cellRenderer={this.renderTextCell}
-									width={this.state.columns.bpm.width}
-									flexGrow={10}
-									flexShrink={20}
-									className={classes.cell}
-								/>
-							) : null}
-							{this.state.columns.size.display ? (
-								<Column
-									label='File Size'
-									dataKey='size'
-									cellRenderer={this.renderTextCell}
-									width={this.state.columns.size.width}
-									flexGrow={10}
-									flexShrink={20}
-									className={classes.cell}
-									cellDataGetter={this.getFileSizeCellData}
-								/>
-							) : null}
-							{this.state.columns.path.display ? (
-								<Column
-									label='Path'
-									dataKey='path'
-									cellRenderer={this.renderTextCell}
-									width={this.state.columns.path.width}
-									flexGrow={40}
-									flexShrink={20}
-									className={classes.cell}
-								/>
-							) : null}
 
 							{/*Column Selection Empty Column */}
 							{this.state.renderTableHeader ? (<Column
