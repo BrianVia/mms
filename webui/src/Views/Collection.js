@@ -169,7 +169,7 @@ class Collection extends Component {
 	collectionID = null;
 	sort = null;
 	filters = [];
-	minWidth: 5;
+	minWidth = 5;
 
 
 	updateContent = () => {
@@ -283,6 +283,7 @@ class Collection extends Component {
 	};
 
 	renderColumnSelectionHeader = () => {
+		console.log(this.state.columns);
 		if (this.state.renderTableHeader) {
 			return (
 				<ColumnSelection columns={this.state.columns} updateDisplayedColumns={this.updateDisplayedColumns} />
@@ -397,14 +398,13 @@ class Collection extends Component {
 								dataKey='artworkURL'
 
 								className={classes.cellArtwork}
-								width={48}
+								width={60}
 								flexGrow={0}
 								flexShrink={0}
 								cellRenderer={this.renderArtwork}
 							/>
 
 							{this.renderDynamicColumns()}
-
 
 							{/*Column Selection Empty Column */}
 							{this.state.renderTableHeader ? (<Column
