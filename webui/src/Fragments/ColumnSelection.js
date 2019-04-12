@@ -62,7 +62,7 @@ class ColumnSelection extends Component {
 			>
 				{Object.keys(this.props.columns).map(key => (
 					<MenuItem
-						key={this.props.columns[key].name}
+						key={this.props.columns[key].dataKey}
 						value={this.props.columns[key].display}
 					>
 						<Checkbox checked={this.props.columns[key].display} />

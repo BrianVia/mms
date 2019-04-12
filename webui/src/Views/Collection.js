@@ -80,29 +80,23 @@ const styles = theme => ({
 
 });
 
+const TOTAL_WIDTH = window.innerWidth;
+
 class Collection extends Component {
 
 	defaultDesktopColumns = {
-		artworkURL: {
-			dataKey: 'artWorkURL',
-			label: 'Artwork',
-			display: true,
-			width: 100,
-			cellRenderer: this.renderArtwork
-
-		},
 		title: {
 			dataKey: 'title',
 			label: 'Title',
 			display: true,
-			width: 100,
+			width: 0.15,
 			cellRenderer: this.renderTextCell
 		},
 		artists: {
 			dataKey: 'artists',
 			label: 'Artists',
 			display: true,
-			width: 100,
+			width: 0.15,
 			cellRenderer: this.renderTextCell
 
 		},
@@ -110,49 +104,49 @@ class Collection extends Component {
 			dataKey: 'album',
 			label: 'Album',
 			display: true,
-			width: 100,
+			width: 0.10,
 			cellRenderer: this.renderTextCell
 		},
 		genres: {
 			dataKey: 'genres',
 			label: 'genres',
 			display: true,
-			width: 50,
+			width: 0.10,
 			cellRenderer: this.renderTextCell
 		},
 		year: {
 			dataKey: 'year',
 			label: 'Year',
 			display: true,
-			width: 30,
+			width: 0.10,
 			cellRenderer: this.renderTextCell
 		},
 		duration: {
 			dataKey: 'duration',
 			label: 'Duration',
 			display: true,
-			width: 15,
-			cellRenderer: this.renderTextCell
+			width: 0.10,
+			cellRenderer: this.getDurationCellData
 		},
 		bpm: {
 			dataKey: 'bpm',
 			label: 'BPM',
 			display: true,
-			width: 50,
+			width: 0.05,
 			cellRenderer: this.renderTextCell
 		},
 		size: {
 			dataKey: 'size',
 			label: 'Size',
 			display: true,
-			width: 50,
+			width: 0.05,
 			cellRenderer: this.renderTextCell
 		},
 		path: {
 			dataKey: 'path',
 			label: 'Path',
 			display: false,
-			width: 0,
+			width: 0.15,
 			cellRenderer: this.renderTextCell
 		}
 	};
@@ -278,12 +272,10 @@ class Collection extends Component {
 
 	updateDisplayedColumns = (newColumns) => {
 		this.setState({ columns: newColumns });
-
 		localStorage.setItem('columnsConfig-' + this.collectionID, JSON.stringify(newColumns));
 	};
 
 	renderColumnSelectionHeader = () => {
-		console.log(this.state.columns);
 		if (this.state.renderTableHeader) {
 			return (
 				<ColumnSelection columns={this.state.columns} updateDisplayedColumns={this.updateDisplayedColumns} />
@@ -320,25 +312,44 @@ class Collection extends Component {
 					position={{ x: 0 }}
 					zIndex={999}
 				>
-					<span className='DragHandleIcon'>⋮</span>
+					<span>⋮</span>
 				</Draggable>
 			</React.Fragment>
 		);
 	};
 
-	resizeRow = ({ event, dataKey, deltaX }) => {
-		this.setState(prevState => {
-			const columns = prevState.columns;
-			let newColumns = columns;
-			newColumns[dataKey].width = columns[dataKey].width + deltaX;
-			newColumns[newColumns[dataKey].nextKey].width = columns[columns[dataKey].nextKey].width - deltaX;
+	resizeRow = ({ dataKey, deltaX }) =>
+    this.setState(prevState => {
+      const prevColumns = prevState.columns;
+      const percentDelta = deltaX / TOTAL_WIDTH;
 
-			return {
-				columns: newColumns
-			};
+      // const nextDataKey = dataKey === "name" ? "location" : "description";
 
-		});
-	};
+      const dataKeys = Object.keys(this.state.columns);
+      console.log(dataKeys);
+      const nextDataKey =
+        dataKeys[
+          dataKeys.findIndex(element => {
+            return dataKey === element;
+          }) + 1
+        ];
+
+      console.log(nextDataKey);
+
+      const column = prevColumns[dataKey];
+      column.width = prevColumns[dataKey].width + percentDelta;
+
+      const nextColumn = prevColumns[nextDataKey];
+      nextColumn.width = prevColumns[nextDataKey].width - percentDelta;
+
+      return {
+        columns: {
+          ...prevColumns,
+          [dataKey]: column,
+          [nextDataKey]: nextColumn
+        }
+      };
+    });
 
 
 	handleTrackClick = ({ event, index, rowData }) => {
@@ -355,18 +366,29 @@ class Collection extends Component {
 		}
 	}
 
-	renderDynamicColumns = () => {
-		const { columns } = this.state;
+	renderDynamicColumns = (columns,classes) => {
 		const { headerHeight } = this.state;
 		const tableColumns = [];
+		console.log(columns);
 		for (const column in columns) {
+			console.log(column);
+			
 			tableColumns.push(
-				<Column
-					width={column.width}
-					headerHeight={headerHeight}
-				>
-				</Column>);
+				columns[column].display ? <Column
+				width={columns[column].width * TOTAL_WIDTH}
+				headerHeight={headerHeight}
+				cellRenderer={columns[column].cellRenderer}
+				label={columns[column].label}
+				flexGrow={columns[column].flexGrow}
+				flexShrink={columns[column].flexShrink}
+				dataKey={columns[column].dataKey}
+				className={classes.cell}
+				headerRenderer={this.renderDraggableHeader}
+			></Column> : null
+				);
 		}
+
+		return tableColumns;
 	}
 
 	render() {
@@ -404,7 +426,7 @@ class Collection extends Component {
 								cellRenderer={this.renderArtwork}
 							/>
 
-							{this.renderDynamicColumns()}
+							{this.renderDynamicColumns(columns, classes)}
 
 							{/*Column Selection Empty Column */}
 							{this.state.renderTableHeader ? (<Column
