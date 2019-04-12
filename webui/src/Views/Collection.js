@@ -90,14 +90,16 @@ class Collection extends Component {
 			label: 'Title',
 			display: true,
 			width: 0.15,
-			cellRenderer: this.renderTextCell
+			cellRenderer: this.renderTextCell,
+			headerRenderer: this.renderDraggableHeader
 		},
 		artists: {
 			dataKey: 'artists',
 			label: 'Artists',
 			display: true,
 			width: 0.15,
-			cellRenderer: this.renderTextCell
+			cellRenderer: this.renderTextCell,
+			headerRenderer: this.renderDraggableHeader
 
 		},
 		album: {
@@ -105,49 +107,56 @@ class Collection extends Component {
 			label: 'Album',
 			display: true,
 			width: 0.10,
-			cellRenderer: this.renderTextCell
+			cellRenderer: this.renderTextCell,
+			headerRenderer: this.renderDraggableHeader
 		},
 		genres: {
 			dataKey: 'genres',
 			label: 'genres',
 			display: true,
 			width: 0.10,
-			cellRenderer: this.renderTextCell
+			cellRenderer: this.renderTextCell,
+			headerRenderer: this.renderDraggableHeader
 		},
 		year: {
 			dataKey: 'year',
 			label: 'Year',
 			display: true,
 			width: 0.10,
-			cellRenderer: this.renderTextCell
+			cellRenderer: this.renderTextCell,
+			headerRenderer: this.renderDraggableHeader
 		},
 		duration: {
 			dataKey: 'duration',
 			label: 'Duration',
 			display: true,
 			width: 0.10,
-			cellRenderer: this.getDurationCellData
+			cellRenderer: this.getDurationCellData,
+			headerRenderer: this.renderDraggableHeader
 		},
 		bpm: {
 			dataKey: 'bpm',
 			label: 'BPM',
 			display: true,
 			width: 0.05,
-			cellRenderer: this.renderTextCell
+			cellRenderer: this.renderTextCell,
+			headerRenderer: this.renderDraggableHeader
 		},
 		size: {
 			dataKey: 'size',
 			label: 'Size',
 			display: true,
 			width: 0.05,
-			cellRenderer: this.renderTextCell
+			cellRenderer: this.renderTextCell,
+			headerRenderer: this.renderDraggableHeader
 		},
 		path: {
 			dataKey: 'path',
 			label: 'Path',
 			display: false,
 			width: 0.15,
-			cellRenderer: this.renderTextCell
+			cellRenderer: this.renderTextCell,
+			headerRenderer: this.renderDraggableHeader
 		}
 	};
 	defaultMobileColumns = {};
@@ -319,40 +328,40 @@ class Collection extends Component {
 	};
 
 	resizeRow = ({ dataKey, deltaX }) =>
-    this.setState(prevState => {
-      const prevColumns = prevState.columns;
-      const percentDelta = deltaX / TOTAL_WIDTH;
+		this.setState(prevState => {
+			const prevColumns = prevState.columns;
+			const percentDelta = deltaX / TOTAL_WIDTH;
 
-      // const nextDataKey = dataKey === "name" ? "location" : "description";
+			// const nextDataKey = dataKey === "name" ? "location" : "description";
 
-      const dataKeys = Object.keys(this.state.columns);
-      console.log(dataKeys);
-      const nextDataKey =
+			const dataKeys = Object.keys(this.state.columns);
+			console.log(dataKeys);
+			const nextDataKey =
         dataKeys[
-          dataKeys.findIndex(element => {
-            return dataKey === element;
-          }) + 1
+        	dataKeys.findIndex(element => {
+        		return dataKey === element;
+        	}) + 1
         ];
 
-      console.log(nextDataKey);
+			console.log(nextDataKey);
 
-      const column = prevColumns[dataKey];
-      column.width = prevColumns[dataKey].width + percentDelta;
+			const column = prevColumns[dataKey];
+			column.width = prevColumns[dataKey].width + percentDelta;
 
-      const nextColumn = prevColumns[nextDataKey];
-      nextColumn.width = prevColumns[nextDataKey].width - percentDelta;
+			const nextColumn = prevColumns[nextDataKey];
+			nextColumn.width = prevColumns[nextDataKey].width - percentDelta;
 
-      return {
-        columns: {
-          ...prevColumns,
-          [dataKey]: column,
-          [nextDataKey]: nextColumn
-        }
-      };
-    });
+			return {
+				columns: {
+					...prevColumns,
+					[dataKey]: column,
+					[nextDataKey]: nextColumn
+				}
+			};
+		});
 
 
-	handleTrackClick = ({ event, index, rowData }) => {
+	handleTrackClick = ({ rowData }) => {
 		//@TODO implement track list selection
 		Playback.playMediaItem(rowData);
 		this.setState({ playingTrack: rowData });
@@ -369,23 +378,21 @@ class Collection extends Component {
 	renderDynamicColumns = (columns,classes) => {
 		const { headerHeight } = this.state;
 		const tableColumns = [];
-		console.log(columns);
 		for (const column in columns) {
-			console.log(column);
 			
 			tableColumns.push(
 				columns[column].display ? <Column
-				width={columns[column].width * TOTAL_WIDTH}
-				headerHeight={headerHeight}
-				cellRenderer={columns[column].cellRenderer}
-				label={columns[column].label}
-				flexGrow={columns[column].flexGrow}
-				flexShrink={columns[column].flexShrink}
-				dataKey={columns[column].dataKey}
-				className={classes.cell}
-				headerRenderer={this.renderDraggableHeader}
-			></Column> : null
-				);
+					width={columns[column].width * TOTAL_WIDTH}
+					headerHeight={headerHeight}
+					cellRenderer={columns[column].cellRenderer}
+					label={columns[column].label}
+					flexGrow={columns[column].flexGrow}
+					flexShrink={columns[column].flexShrink}
+					dataKey={columns[column].dataKey}
+					className={classes.cell}
+					headerRenderer={this.renderDraggableHeader}
+				></Column> : null
+			);
 		}
 
 		return tableColumns;
