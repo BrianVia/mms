@@ -241,8 +241,8 @@ class Collection extends Component {
 		else return '';
 	};
 
-	getFileSizeCellData = ({ rowData }) => {
-		let fileSize = rowData.size;
+	getFileSizeCellData = ({ cellData }) => {
+		let fileSize = cellData;
 		if (fileSize > 1024 && fileSize < 1048576) {
 			return (fileSize / 1024).toFixed(2) + ' KB';
 		} else if (fileSize > 1048576) {
@@ -250,8 +250,8 @@ class Collection extends Component {
 		}
 	};
 
-	getDurationCellData = ({ rowData }) => {
-		var duration = rowData.duration;
+	getDurationCellData = ({ cellData }) => {
+		var duration = cellData;
 		if (duration >= 0) {
 			var min = String(Math.trunc(duration / 60) + ':');
 			var sec = String(Math.trunc(duration % 60));
@@ -371,10 +371,13 @@ class Collection extends Component {
 		rowIndex
 	  })=> {
 		if(dataKey === 'duration'){
-			cellData = this.getDurationCellData({cellData, rowData});
+			cellData = this.getDurationCellData({cellData});
 		}
 		else if(dataKey === 'artists') {
 			cellData = this.getArtistCellData({rowData});
+		}
+		else if(dataKey === 'size') {
+			cellData = this.getFileSizeCellData({cellData});
 		}
 		
 		if (rowData.db_id === this.state.playingTrack.db_id) {
