@@ -353,6 +353,7 @@ class Collection extends Component {
 				}
 			};
 		});
+		
 
 
 	handleTrackClick = ({ rowData }) => {
