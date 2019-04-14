@@ -213,8 +213,6 @@ class Collection extends Component {
 		if (Playback.getActive()) {
 			this.setState({ playingTrack: Playback.getCurrentMediaItem() });
 		}
-
-		// console.log(this.state.columns.artists.display);
 	};
 
 	componentDidUpdate = prevProps => {
@@ -335,16 +333,12 @@ class Collection extends Component {
 			// const nextDataKey = dataKey === "name" ? "location" : "description";
 
 			const dataKeys = Object.keys(this.state.columns);
-			console.log(dataKeys);
 			const nextDataKey =
         dataKeys[
         	dataKeys.findIndex(element => {
         		return dataKey === element;
         	}) + 1
         ];
-
-			console.log(nextDataKey);
-
 			const column = prevColumns[dataKey];
 			column.width = prevColumns[dataKey].width + percentDelta;
 
@@ -367,7 +361,22 @@ class Collection extends Component {
 		this.setState({ playingTrack: rowData });
 	};
 
-	renderTextCell = ({ cellData, rowData }) => {
+	renderTextCell = ({
+		cellData,
+		columnData,
+		columnIndex,
+		dataKey,
+		isScrolling,
+		rowData,
+		rowIndex
+	  })=> {
+		if(dataKey === 'duration'){
+			cellData = this.getDurationCellData({cellData, rowData});
+		}
+		else if(dataKey === 'artists') {
+			cellData = this.getArtistCellData({rowData});
+		}
+		
 		if (rowData.db_id === this.state.playingTrack.db_id) {
 			return (<strong>{cellData}</strong>);
 		} else {
@@ -384,7 +393,7 @@ class Collection extends Component {
 				columns[column].display ? <Column
 					width={columns[column].width * TOTAL_WIDTH}
 					headerHeight={headerHeight}
-					cellRenderer={columns[column].cellRenderer}
+					cellRenderer={this.renderTextCell}
 					label={columns[column].label}
 					flexGrow={columns[column].flexGrow}
 					flexShrink={columns[column].flexShrink}
@@ -420,12 +429,9 @@ class Collection extends Component {
 							rowClassName={classes.row}
 							onRowClick={this.handleTrackClick}
 						>
-
-
 							<Column
 								label='Artwork'
 								dataKey='artworkURL'
-
 								className={classes.cellArtwork}
 								width={60}
 								flexGrow={0}
