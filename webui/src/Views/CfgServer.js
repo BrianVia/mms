@@ -1,26 +1,37 @@
+//@ts-check
 import React, { Component } from 'react';
 import { withStyles } from '@material-ui/core/styles';
 
 import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField';
+import Paper from '@material-ui/core/Paper';
 
-import Server from 'server';
+import Server from '../server';
 
 const styles = ({
+	paper: {
+		margin: '1em 0px',
+		padding: '1em',
+	}
 });
 
-class Collections extends Component {
+class CfgServer extends Component {
 	state = {
+		modified: false,
+
 		serverName: '',
-		origServerName: '',
+
+		localHttpPort: '',
+		localHttpsPort: '',
 	}
 
 	updateContent = () => {
 		Server.getInfo().then((info) => {
 			this.setState({
 				serverName: info.serverName,
-				origServerName: info.serverName,
+				localHttpPort: info.httpPort,
+				localHttpsPort: info.httpsPort,
 			});
 		});
 	}
@@ -29,16 +40,20 @@ class Collections extends Component {
 		this.updateContent();
 	}
 
-	handleServerNameChange = (event) => {
-		this.setState({ serverName: event.currentTarget.value });
+	handleTextChange = (event) => {
+		const change = { modified: true };
+		change[event.currentTarget.id] = event.currentTarget.value;
+		this.setState(change);
 	}
 
 	handleSave = () => {
 		this.setState({
-			origServerName: this.state.serverName,
+			modified: false,
 		});
 		Server.saveCongif({
 			serverName: this.state.serverName,
+			httpPort: this.state.localHttpPort,
+			httpsPort: this.state.localHttpsPort,
 		});
 	}
 
@@ -47,23 +62,50 @@ class Collections extends Component {
 			<Grid container justify='center'>
 				<Grid item xs={12} sm={6} lg={4}>
 					<Grid container direction='column'>
-						<Grid item>
-							<TextField
-								id='servername'
-								value={this.state.serverName}
-								label='Server name'
-								placeholder='MediaMonkey Server'
-								onChange={this.handleServerNameChange}
-								fullWidth
-							/>
-						</Grid>
-						<Grid item>
+						<Paper className='paper'>
+							{/* Server name */}
+							<Grid item>
+								<TextField
+									id='serverName'
+									value={this.state.serverName}
+									label='Server name'
+									placeholder='MediaMonkey Server'
+									onChange={this.handleTextChange}
+									fullWidth
+								/>
+							</Grid>
+						</Paper>
+
+						<Paper className='paper'>
+							{/* HTTP Port */}
+							<Grid item style={{ marginTop: '0.2em' }}>
+								<TextField
+									id='localHttpPort'
+									value={this.state.localHttpPort}
+									label='Local HTTP port'
+									onChange={this.handleTextChange}
+								/>
+							</Grid>
+							<Grid item style={{ marginTop: '1em' }}>
+								<TextField
+									id='localHttpsPort'
+									value={this.state.localHttpsPort}
+									label='Local HTTPS port'
+									onChange={this.handleTextChange}
+								/>
+							</Grid>
+						</Paper>
+
+						{/* Save Button */}
+						<Grid item style={{ marginTop: '0.6em' }}>
 							<Grid container justify='flex-end'>
 								<Button
 									onClick={this.handleSave}
-									disabled={this.state.serverName === this.state.origServerName}
-									color='primary'>
-									Save changes
+									disabled={!this.state.modified}
+									color='secondary'
+									variant='contained'
+								>
+									{'Save changes'}
 								</Button>
 							</Grid>
 						</Grid>
@@ -74,5 +116,5 @@ class Collections extends Component {
 	}
 }
 
-export default withStyles(styles)(Collections);
+export default withStyles(styles)(CfgServer);
 
