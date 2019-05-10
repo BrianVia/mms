@@ -1,3 +1,4 @@
+//@ts-check
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
@@ -13,7 +14,7 @@ const styles = {
 	card: {}
 };
 
-class Collection extends Component {
+class Playlist extends Component {
 	state = {
 		playlistsArray: [],
 		playlistsTree: {}
@@ -54,8 +55,8 @@ class Collection extends Component {
 	}
 }
 
-Collection.propTypes = {
-	classes: PropTypes.object.isRequired
+Playlist.propTypes = {
+	classes: PropTypes.object.isRequired,
 };
 
-export default withStyles(styles)(Collection);
+export default withStyles(styles)(Playlist);

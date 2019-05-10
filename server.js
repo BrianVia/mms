@@ -68,9 +68,6 @@ commander.option('-p, --httpPort <port>', 'Http port', function (v) {
 });
 
 commander.dlna = !!commander.dlna;
-if (!commander.uuid) {
-	commander.uuid = '142f98b7-c28b-4b6f-8ca2-b55d9f0657e3';
-}
 
 try {
 	commander.parse(process.argv);
@@ -201,12 +198,13 @@ async function start() {
 
 	var stopped = false;
 
-	var _stopAndExit = function () {
+	var _stopAndExit = async function () {
 		console.log('disconnecting...');
 		stopped = true;
 
-		server.stop(() => {});
+		await server.stop(() => {});
 
+		// JH: we can remove this timeout sometimes, after we review all the stuff and use async/await everywhere consistently
 		setTimeout(function () {
 			process.exit();
 		}, 1000);

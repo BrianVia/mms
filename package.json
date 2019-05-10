@@ -11,9 +11,11 @@
     "debug": "^3.1.0",
     "exif": "^0.6.0",
     "express": "^4.16.2",
+    "fast-xml-parser": "^3.12.16",
     "follow-redirects": "^1.4.1",
     "gm": "^1.21.1",
     "ip": "^1.1.5",
+    "ipaddr.js": "^1.9.0",
     "jstoxml": "^1.2.0",
     "mime": "^2.2.0",
     "mkdirp": "^0.5.1",
@@ -22,10 +24,12 @@
     "node-ssdp": "^3.3.0",
     "opn": "^5.4.0",
     "pubsub-js": "^1.7.0",
+    "pwd": "^1.1.0",
     "range-parser": "^1.0.3",
     "request": "^2.69.0",
     "rimraf": "^2.6.2",
     "sax": "^1.2.4",
+    "selfsigned": "^1.10.4",
     "send": "^0.16.2",
     "socket.io": "^2.0.4",
     "sqlite3": "^4.0.2",
@@ -95,5 +99,5 @@
     "build-armv8-synology": "node scripts/build-rtd1296-synology",
     "build-nodepkg-rtd1296": "node scripts/build-nodepkg-rtd1296.js"
   },
-  "version": "0.2.5"
+  "version": "0.3.1"
 }

@@ -1,3 +1,4 @@
+//@ts-check
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
@@ -8,8 +9,8 @@ import CardActions from '@material-ui/core/CardActions';
 import CardContent from '@material-ui/core/CardContent';
 import CardHeader from '@material-ui/core/CardHeader';
 
-import LogList from 'Fragments/LogList';
-import CollectionsList from 'Fragments/CollectionsList';
+import LogList from '../Fragments/LogList';
+import CollectionsList from '../Fragments/CollectionsList';
 
 import PubSub from 'pubsub-js';
 
@@ -28,7 +29,7 @@ class Dashboard extends Component {
 	}
 
 	handleNewCollection() {
-		PubSub.publish('ADD_COLLECTION');
+		PubSub.publish('ADD_COLLECTION', null);
 	}
 
 	handleShowLog = () => {
@@ -38,35 +39,39 @@ class Dashboard extends Component {
 	}
 
 	render() {
-		const { classes } = this.props;
+		const { classes, user } = this.props;
 
 		return (
 			<Grid container justify='space-around' spacing={16}>
 				{/* Collections */}
-				<Grid item xs={12} sm={6}>
-					<Card>
-						<CardHeader title='Collections' />
-						<CardContent>
-							<CollectionsList hideCreate click='show' />
-						</CardContent>
-						<CardActions className={classes.cardActions}>
-							<Button onClick={this.handleNewCollection} color='primary'>Create Collection</Button>
-						</CardActions>
-					</Card>
-				</Grid>
+				{user &&
+					<Grid item xs={12} sm={6}>
+						<Card>
+							<CardHeader title='Collections' />
+							<CardContent>
+								<CollectionsList hideCreate click='show' />
+							</CardContent>
+							<CardActions className={classes.cardActions}>
+								<Button onClick={this.handleNewCollection} color='primary'>Create Collection</Button>
+							</CardActions>
+						</Card>
+					</Grid>
+				}
 
 				{/* Server log */}
-				<Grid item xs={12} sm={6}>
-					<Card>
-						<CardHeader title='Server Activity' />
-						<CardContent>
-							<LogList maxItems={MAX_LOG_ITEMS} />
-						</CardContent>
-						<CardActions className={classes.cardActions}>
-							<Button onClick={this.handleShowLog} color='primary'>Show Full Log</Button>
-						</CardActions>
-					</Card>
-				</Grid>
+				{user &&
+					<Grid item xs={12} sm={6}>
+						<Card>
+							<CardHeader title='Server Activity' />
+							<CardContent>
+								<LogList maxItems={MAX_LOG_ITEMS} />
+							</CardContent>
+							<CardActions className={classes.cardActions}>
+								<Button onClick={this.handleShowLog} color='primary'>Show Full Log</Button>
+							</CardActions>
+						</Card>
+					</Grid>
+				}
 			</Grid>
 		);
 	}
@@ -75,6 +80,7 @@ class Dashboard extends Component {
 Dashboard.propTypes = {
 	classes: PropTypes.object.isRequired,
 	history: PropTypes.object.isRequired,
+	user: PropTypes.object,
 };
 
 export default withStyles(styles)(withRouter(Dashboard));
