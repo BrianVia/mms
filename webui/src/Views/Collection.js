@@ -451,7 +451,7 @@ class Collection extends Component {
 								label="Artwork"
 								dataKey="artworkURL"
 								className={classes.cellArtwork}
-								width={60}
+								width={80}
 								flexGrow={0}
 								flexShrink={0}
 								cellRenderer={this.renderArtwork}
