@@ -10,14 +10,17 @@ import List from '@material-ui/icons/List';
 
 const styles = theme => ({
 	width: '50px',
+	selectStyle: {
+		width: '30px'
+	},
 	listIconStyle: {
 		position: 'absolute',
-		top: '0',
-		right: '0',
+		top: '-4px',
+		left: '1px',
 		display: 'inline-block',
-		color: '#000',
-		width: '40px',
-		height: '40px',
+		color: 'lightgrey',
+		width: '35px',
+		height: '35px',
 		pointerEvents: 'none',
 	}
 
@@ -33,7 +36,7 @@ class ColumnSelection extends Component {
 		let newColumns = this.props.columns;
 		newColumns[child.key].display = !newColumns[child.key].display;
 		this.props.updateDisplayedColumns(newColumns);
-	};
+	}
 
 	componentDidMount = () => {
 		console.log(this.props);
@@ -41,15 +44,15 @@ class ColumnSelection extends Component {
 
 	render() {
 		const { classes } = this.props;
-		console.log(classes);
-
 		return (
 
 
 			<Select
+				
 				IconComponent={() =>
 					<List className={classes.listIconStyle} />
 				}
+				className={classes.selectStyle}
 				value={this.state.displayedColumns}
 				multiple
 				onChange={this.onColumnSelectionChange}
@@ -59,7 +62,7 @@ class ColumnSelection extends Component {
 			>
 				{Object.keys(this.props.columns).map(key => (
 					<MenuItem
-						key={this.props.columns[key].name}
+						key={this.props.columns[key].dataKey}
 						value={this.props.columns[key].display}
 					>
 						<Checkbox checked={this.props.columns[key].display} />

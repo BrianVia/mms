@@ -5,9 +5,10 @@ import 'react-virtualized/styles.css';
 import { AutoSizer } from 'react-virtualized';
 import { Table, Column } from 'react-virtualized';
 import Avatar from '@material-ui/core/Avatar';
-
+import Draggable from 'react-draggable';
 import Server from '../server';
 import Playback from '../playback';
+
 import {
 	subscribeCollectionSort,
 	subscribeCollectionChangeFilters,
@@ -78,190 +79,101 @@ const styles = theme => ({
 	}
 });
 
+const TOTAL_WIDTH = window.innerWidth;
+
 class Collection extends Component {
+	defaultDesktopColumns = {
+		title: {
+			dataKey: 'title',
+			label: 'Title',
+			display: true,
+			width: 0.15,
+			cellRenderer: this.renderTextCell,
+			headerRenderer: this.renderDraggableHeader
+		},
+		artists: {
+			dataKey: 'artists',
+			label: 'Artists',
+			display: true,
+			width: 0.15,
+			cellRenderer: this.renderTextCell,
+			headerRenderer: this.renderDraggableHeader
+		},
+		album: {
+			dataKey: 'album',
+			label: 'Album',
+			display: true,
+			width: 0.1,
+			cellRenderer: this.renderTextCell,
+			headerRenderer: this.renderDraggableHeader
+		},
+		genres: {
+			dataKey: 'genres',
+			label: 'genres',
+			display: true,
+			width: 0.1,
+			cellRenderer: this.renderTextCell,
+			headerRenderer: this.renderDraggableHeader
+		},
+		year: {
+			dataKey: 'year',
+			label: 'Year',
+			display: true,
+			width: 0.1,
+			cellRenderer: this.renderTextCell,
+			headerRenderer: this.renderDraggableHeader
+		},
+		duration: {
+			dataKey: 'duration',
+			label: 'Duration',
+			display: true,
+			width: 0.1,
+			cellRenderer: this.getDurationCellData,
+			headerRenderer: this.renderDraggableHeader
+		},
+		bpm: {
+			dataKey: 'bpm',
+			label: 'BPM',
+			display: true,
+			width: 0.05,
+			cellRenderer: this.renderTextCell,
+			headerRenderer: this.renderDraggableHeader
+		},
+		size: {
+			dataKey: 'size',
+			label: 'Size',
+			display: true,
+			width: 0.05,
+			cellRenderer: this.renderTextCell,
+			headerRenderer: this.renderDraggableHeader
+		},
+		path: {
+			dataKey: 'path',
+			label: 'Path',
+			display: false,
+			width: 0.15,
+			cellRenderer: this.renderTextCell,
+			headerRenderer: this.renderDraggableHeader
+		}
+	};
+	defaultMobileColumns = {};
+
 	state = {
 		tracks: [],
 		headerHeight: 30,
 		displayedColumns: [],
-		renderTableHeader: false,
+		renderTableHeader: true,
 		playingTrack: {},
-		columns: {
-			title: {
-				name: 'title',
-				label: 'Title',
-				display: true,
-				width: 200
-			},
-			artist: {
-				name: 'artist',
-				label: 'Artist',
-				display: true,
-				width: 150
-			},
-			album: {
-				name: 'album',
-				label: 'Album',
-				display: true,
-				width: 100
-			},
-			duration: {
-				name: 'duration',
-				label: 'Duration',
-				display: true,
-				width: 20
-			},
-			genre: {
-				name: 'genre',
-				label: 'Genre',
-				display: true,
-				width: 50
-			},
-			year: {
-				name: 'year',
-				label: 'Year',
-				display: true,
-				width: 30
-			},
-			bpm: {
-				name: 'bpm',
-				label: 'BPM',
-				display: true,
-				width: 30
-			},
-			path: {
-				name: 'path',
-				label: 'Path',
-				display: false,
-				width: 40
-			},
-			size: {
-				name: 'size',
-				label: 'Size',
-				display: true,
-				width: 40
-			}
-		}
+		columns: this.defaultDesktopColumns
 	};
 	collectionID = null;
 	sort = null;
 	filters = [];
-	defaultDesktopColumns = {
-		title: {
-			name: 'title',
-			label: 'Title',
-			display: true,
-			width: 200
-		},
-		artist: {
-			name: 'artist',
-			label: 'Artist',
-			display: true,
-			width: 150
-		},
-		album: {
-			name: 'album',
-			label: 'Album',
-			display: true,
-			width: 200
-		},
-		duration: {
-			name: 'duration',
-			label: 'Duration',
-			display: true,
-			width: 20
-		},
-		genre: {
-			name: 'genre',
-			label: 'Genre',
-			display: true,
-			width: 50
-		},
-		year: {
-			name: 'year',
-			label: 'Year',
-			display: true,
-			width: 30
-		},
-		bpm: {
-			name: 'bpm',
-			label: 'BPM',
-			display: true,
-			width: 30
-		},
-		path: {
-			name: 'path',
-			label: 'Path',
-			display: false,
-			width: 40
-		},
-		size: {
-			name: 'size',
-			label: 'Size',
-			display: true,
-			width: 40
-		}
-	};
-	defaultMobileColumns = {
-		title: {
-			name: 'title',
-			label: 'Title',
-			display: true,
-			width: 100
-		},
-		artist: {
-			name: 'artist',
-			label: 'Artist',
-			display: true,
-			width: 100
-		},
-		album: {
-			name: 'album',
-			label: 'Album',
-			display: true,
-			width: 100
-		},
-		duration: {
-			name: 'duration',
-			label: 'Duration',
-			display: false,
-			width: 0
-		},
-		genre: {
-			name: 'genre',
-			label: 'Genre',
-			display: false,
-			width: 0
-		},
-		year: {
-			name: 'year',
-			label: 'Year',
-			display: false,
-			width: 0
-		},
-		bpm: {
-			name: 'bpm',
-			label: 'BPM',
-			display: false,
-			width: 0
-		},
-		path: {
-			name: 'path',
-			label: 'Path',
-			display: false,
-			width: 0
-		},
-		size: {
-			name: 'size',
-			label: 'Size',
-			display: false,
-			width: 0
-		}
-	}
+	minWidth = 5;
 
 	updateContent = () => {
 		this.setState({ tracks: [] });
 		if (this.props.search) {
-			console.log(this.sort);
 			Server.search(this.props.searchTerm, this.sort, this.filters).then(
 				tracklist => this.setState({ tracks: tracklist })
 			);
@@ -279,7 +191,9 @@ class Collection extends Component {
 		subscribeCollectionSort(this.handleChangeSort);
 		subscribeCollectionChangeFilters(this.handleChangeFilters);
 
-		const localStorageRefColumns = localStorage.getItem('columns');
+		const localStorageRefColumns = localStorage.getItem(
+			'columnsConfig-' + this.collectionID
+		);
 
 		if (localStorageRefColumns) {
 			this.setState({ columns: JSON.parse(localStorageRefColumns) });
@@ -291,7 +205,6 @@ class Collection extends Component {
 			} else {
 				this.setState({ columns: this.defaultDesktopColumns });
 				this.setState({ renderTableHeader: true });
-
 			}
 		}
 
@@ -326,8 +239,8 @@ class Collection extends Component {
 		else return '';
 	};
 
-	getFileSizeCellData = ({ rowData }) => {
-		let fileSize = rowData.size;
+	getFileSizeCellData = ({ cellData }) => {
+		let fileSize = cellData;
 		if (fileSize > 1024 && fileSize < 1048576) {
 			return (fileSize / 1024).toFixed(2) + ' KB';
 		} else if (fileSize > 1048576) {
@@ -335,8 +248,8 @@ class Collection extends Component {
 		}
 	};
 
-	getDurationCellData = ({ rowData }) => {
-		var duration = rowData.duration;
+	getDurationCellData = ({ cellData }) => {
+		var duration = cellData;
 		if (duration >= 0) {
 			var min = String(Math.trunc(duration / 60) + ':');
 			var sec = String(Math.trunc(duration % 60));
@@ -362,45 +275,160 @@ class Collection extends Component {
 		}
 	};
 
-	updateDisplayedColumns = (newColumns) => {
+	updateDisplayedColumns = newColumns => {
 		this.setState({ columns: newColumns });
-		localStorage.setItem('columns', JSON.stringify(newColumns));
-	}
+		localStorage.setItem(
+			'columnsConfig-' + this.collectionID,
+			JSON.stringify(newColumns)
+		);
+	};
 
 	renderColumnSelectionHeader = () => {
 		if (this.state.renderTableHeader) {
 			return (
-				<ColumnSelection columns={this.state.columns} updateDisplayedColumns={this.updateDisplayedColumns} />
+				<ColumnSelection
+					columns={this.state.columns}
+					updateDisplayedColumns={this.updateDisplayedColumns}
+				/>
 			);
 		} else {
 			return null;
 		}
-
 	};
 
+	renderDraggableHeader = ({
+		columnData,
+		dataKey,
+		disableSort,
+		label,
+		sortBy,
+		sortDirection
+	}) => {
+		return (
+			<React.Fragment key={dataKey}>
+				<div className="ReactVirtualized__Table__headerTruncatedText">
+					{label}
+				</div>
+				<Draggable
+					axis="x"
+					defaultClassName="DragHandle"
+					defaultClassNameDragging="DragHandleActive"
+					onDrag={(event, { deltaX }) =>
+						this.resizeRow({
+							event,
+							dataKey,
+							deltaX
+						})
+					}
+					position={{ x: 0 }}
+					zIndex={999}
+				>
+					<span>⋮</span>
+				</Draggable>
+			</React.Fragment>
+		);
+	};
 
-	handleTrackDoubleClick = ({ rowData, e }) => {
+	resizeRow = ({ dataKey, deltaX }) =>
+		this.setState(prevState => {
+			const prevColumns = prevState.columns;
+			const percentDelta = deltaX / TOTAL_WIDTH;
+
+			// const nextDataKey = dataKey === "name" ? "location" : "description";
+
+			const dataKeys = Object.keys(this.state.columns);
+			const nextDataKey =
+				dataKeys[
+					dataKeys.findIndex(element => {
+						return dataKey === element;
+					}) + 1
+				];
+
+			if (nextDataKey) {
+				const column = prevColumns[dataKey];
+				column.width = prevColumns[dataKey].width + percentDelta;
+
+				const nextColumn = prevColumns[nextDataKey];
+				nextColumn.width = prevColumns[nextDataKey].width - percentDelta;
+
+				return {
+					columns: {
+						...prevColumns,
+						[dataKey]: column,
+						[nextDataKey]: nextColumn
+					}
+				};
+			} else {
+				const column = prevColumns[dataKey];
+				column.width = prevColumns[dataKey].width + percentDelta;
+
+				return {
+					columns: {
+						...prevColumns,
+						[dataKey]: column
+					}
+				};
+			}
+		});
+
+	handleTrackClick = ({ rowData }) => {
+		//@TODO implement track list selection
 		Playback.playMediaItem(rowData);
 		this.setState({ playingTrack: rowData });
-		this.setState({ selectedTrack: rowData });
 	};
 
-	handleTrackClick = ({ event, index, rowData }) => {
-		//@TODO implement track list selection
-		this.setState({ selectedTrack: rowData });
-	};
+	renderTextCell = ({
+		cellData,
+		columnData,
+		columnIndex,
+		dataKey,
+		isScrolling,
+		rowData,
+		rowIndex
+	}) => {
+		if (dataKey === 'duration') {
+			cellData = this.getDurationCellData({ cellData });
+		} else if (dataKey === 'artists') {
+			cellData = this.getArtistCellData({ rowData });
+		} else if (dataKey === 'size') {
+			cellData = this.getFileSizeCellData({ cellData });
+		}
 
-	renderTextCell = ({ cellData, rowData }) => {
 		if (rowData.db_id === this.state.playingTrack.db_id) {
-			return (<strong>{cellData}</strong>);
+			return <strong>{cellData}</strong>;
 		} else {
 			return cellData;
 		}
-	}
+	};
+
+	renderDynamicColumns = (columns, classes) => {
+		const { headerHeight } = this.state;
+		const tableColumns = [];
+		for (const column in columns) {
+			tableColumns.push(
+				columns[column].display ? (
+					<Column
+						width={columns[column].width * TOTAL_WIDTH}
+						headerHeight={headerHeight}
+						cellRenderer={this.renderTextCell}
+						label={columns[column].label}
+						flexGrow={columns[column].flexGrow}
+						flexShrink={columns[column].flexShrink}
+						dataKey={columns[column].dataKey}
+						className={classes.cell}
+						headerRenderer={this.renderDraggableHeader}
+					/>
+				) : null
+			);
+		}
+
+		return tableColumns;
+	};
 
 	render() {
 		const { classes } = this.props;
 		const { headerHeight } = this.state;
+		const { columns } = this.state;
 
 		return (
 			<div className={classes.root}>
@@ -417,137 +445,37 @@ class Collection extends Component {
 							rowCount={this.state.tracks.length}
 							rowGetter={({ index }) => this.state.tracks[index]}
 							rowClassName={classes.row}
-							onRowDoubleClick={this.handleTrackDoubleClick}
 							onRowClick={this.handleTrackClick}
 						>
-
-
 							<Column
 								label="Artwork"
 								dataKey="artworkURL"
 								className={classes.cellArtwork}
-								width={48}
+								width={80}
 								flexGrow={0}
 								flexShrink={0}
 								cellRenderer={this.renderArtwork}
 							/>
 
-
-							{this.state.columns.title.display ? (
-								<Column
-									label="Track Title"
-									dataKey="title"
-									cellRenderer={this.renderTextCell}
-									headerHeight={headerHeight}
-									className={classes.cell}
-									width={this.state.columns.title.width}
-									flexGrow={10}
-								/>
-							) : null}
-							{this.state.columns.artist.display ? (
-								<Column
-									label="Artist"
-									dataKey="artists"
-									cellRenderer={this.renderTextCell}
-									width={this.state.columns.artist.width}
-									flexGrow={10}
-									className={classes.cell}
-									cellDataGetter={this.getArtistCellData}
-								/>
-							) : null}
-							{this.state.columns.album.display ? (
-								<Column
-									label="Album"
-									dataKey="album"
-									cellRenderer={this.renderTextCell}
-									width={this.state.columns.album.width}
-									flexGrow={10}
-									className={classes.cell}
-								/>
-							) : null}
-							{this.state.columns.genre.display ? (
-								<Column
-									label="Genre"
-									dataKey="genres"
-									cellRenderer={this.renderTextCell}
-									width={this.state.columns.genre.width}
-									flexGrow={10}
-									className={classes.cell}
-								/>
-							) : null}
-							{this.state.columns.year.display ? (
-								<Column
-									label="Year"
-									dataKey="year"
-									cellRenderer={this.renderTextCell}
-									width={this.state.columns.year.width}
-									flexGrow={10}
-									className={classes.cell}
-								/>
-							) : null}
-							{this.state.columns.duration.display ? (
-								<Column
-									label="Duration"
-									dataKey="duration"
-									cellRenderer={this.renderTextCell}
-									width={this.state.columns.duration.width}
-									flexGrow={20}
-									flexShrink={0}
-									className={classes.cellRight}
-									cellDataGetter={this.getDurationCellData}
-								/>
-							) : null}
-							{this.state.columns.bpm.display ? (
-								<Column
-									label="BPM"
-									dataKey="bpm"
-									cellRenderer={this.renderTextCell}
-									width={this.state.columns.bpm.width}
-									flexGrow={10}
-									flexShrink={0}
-									className={classes.cell}
-								/>
-							) : null}
-							{this.state.columns.size.display ? (
-								<Column
-									label="File Size"
-									dataKey="size"
-									cellRenderer={this.renderTextCell}
-									width={this.state.columns.size.width}
-									flexGrow={10}
-									flexShrink={0}
-									className={classes.cell}
-									cellDataGetter={this.getFileSizeCellData}
-								/>
-							) : null}
-							{this.state.columns.path.display ? (
-								<Column
-									label="Path"
-									dataKey="path"
-									cellRenderer={this.renderTextCell}
-									width={this.state.columns.path.width}
-									flexGrow={40}
-									flexShrink={0}
-									className={classes.cell}
-								/>
-							) : null}
+							{this.renderDynamicColumns(columns, classes)}
 
 							{/*Column Selection Empty Column */}
-							{this.state.renderTableHeader ? (<Column
-								headerRenderer={this.renderColumnSelectionHeader}
-								width={45}
-								flexGrow={0}
-								flexShrink={0}
-								dataKey=""
-								className={classes.cell}
-							/>) : null}
+							{this.state.renderTableHeader ? (
+								<Column
+									headerRenderer={this.renderColumnSelectionHeader}
+									width={45}
+									flexGrow={0}
+									flexShrink={0}
+									dataKey=""
+									className={classes.cell}
+								/>
+							) : null}
 						</Table>
 					)}
 				</AutoSizer>
 			</div>
 		);
 	}
-
 }
 
 Collection.propTypes = {
