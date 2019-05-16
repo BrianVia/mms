@@ -1,254 +1,253 @@
-// @ts-check
-/* eslint-disable no-console */
-'use strict';
+import PubSub from 'pubsub-js';
+import io from 'socket.io-client';
+import { forceLogRefresh } from 'actions';
+import cookie from 'js-cookie';
 
-var util = require('util');
-var commander = require('commander');
-const http = require('http');
-const pubsub = require('pubsub-js');
-const configuration = require('./lib/configuration');
-const mediaProvider = require('./lib/mediaProvider');
-const daemonizeProcess = require('daemonize-process');
-// @ts-ignore
-const pjson = require('./package.json');
+var serverInfo;
+var auth;
+// var serverInfoPromise;
 
-var Server = require('./api');
-const sysUI = require('./lib/sysUI');
-
-var directories = [];
-
-commander.version(pjson.version, '-v, --version');
-
-commander.option('-d, --directory <path>', 'Mount directory', function (path) {
-	var mountPoint = null;
-	var idx = path.indexOf('=');
-	if (idx > 0) {
-		mountPoint = path.substring(0, idx);
-		path = path.substring(idx + 1);
-	}
-
-	directories.push({
-		path: path,
-		mountPoint: mountPoint
-	});
-});
-commander.option('-m, --music <path>', 'Mount music directory', function (path) {
-	var mountPoint = null;
-	var idx = path.indexOf('=');
-	if (idx > 0) {
-		mountPoint = path.substring(0, idx);
-		path = path.substring(idx + 1);
-	}
-
-	directories.push({
-		type: 'music',
-		path: path,
-		mountPoint: mountPoint
-	});
+// Connect to the server
+const socket = io();
+socket.on('new_log_item', () => {
+	forceLogRefresh();
 });
 
-commander.option('-n, --name <name>', 'Name of server');
-commander.option('-u, --uuid <uuid>', 'UUID of server');
-commander.option('--dlna', 'Enable dlna support');
-commander.option('--lang <lang>', 'Specify language (en, fr)');
-commander.option('--strict', 'Use strict specification');
-commander.option('--ssdpLog', 'Enable log of SSDP engine');
-commander.option('--ssdpLogLevel <level>', 'Log level of SSDP engine');
-
-commander.option('--profiler', 'Enable memory profiler dump');
-commander.option('--heapDump', 'Enable heap dump (require heapdump)');
-
-commander.option('--stop', 'Stop already running local MediaMonkey Server');
-commander.option('--start', 'Start the server as a service');
-commander.option('--status', 'Shows whether there\'s a server running');
-commander.option('--datafolder', 'Sets data directory (where database and config files are stored)');
-
-commander.option('-p, --httpPort <port>', 'Http port', function (v) {
-	return parseInt(v, 10);
+var this_client_id;
+socket.on('id_assigned', (id) => {
+	this_client_id = id;
 });
 
-commander.dlna = !!commander.dlna;
-
-try {
-	commander.parse(process.argv);
-} catch (x) {
-	console.error('Exception while parsing', x);
-}
-
-//commander.garbageItems = true;
-
-function getStatus() {
-	return new Promise((resolve) => {
-		http.request({
-			port: configuration.getBasicConfig().httpPort,
-			path: '/api',
-			method: 'GET',
-		}, (res) => {
-			if (res.statusCode === 200)
-				resolve('running');
-			else
-				resolve('error');
-		}).on('error', () => {
-			resolve('stopped');
-		}).end();
-	});
-}
-
-function initDB() {
-	return new Promise((resolve) => {		
-		var RegistryClass = require('./lib/db/sqlRegistry');
-		var db = new RegistryClass();
-		db.initialize((error) => {
-			if (error) {
-				console.error('Unable to load database: ' + error);
-				resolve();
-			} else
-				configuration.setRegistry(db, () => {
-					mediaProvider.setRegistry(db);		
-					resolve(db);							
-				});
-		});
-	});
-}
-
-function loadConfig() {
-	return new Promise((resolve) => {		
-		configuration.loadConfig((err, config)=>{
-			if (err) {
-				console.error('Unable to load configuration: ' + err);
-				resolve();
-			} else {
-				resolve(config);
+class Server {
+	static fetchJson = (path, options) => {
+		return new Promise((res, reject) => {
+			options = options || {};
+			if (auth) { // Send authenticated requests
+				options.headers = options.headers || new Headers({});
+				options.headers.append('Authorization', 'Bearer ' + auth);
 			}
+
+			fetch('/api' + path, options).then((result) => {
+				try {
+					if (!result.ok)
+						reject(`Error: ${result.status}: ${result.statusText}`);
+					else
+						return result.json();
+				} catch (e) {
+					reject(e);
+				}
+			}).then((json) => {
+				res(json);
+			}).catch(err => {
+				reject(err);
+			});
 		});
-	});
+	}
+
+	static postJson = (path, json, options) => {
+		options = options || {};
+		options.method = options.method || 'POST';
+		options.headers = new Headers({
+			'Content-Type': 'application/json'
+		});
+		options.body = JSON.stringify(json);
+		return Server.fetchJson(path, options);
+	}
+
+	static deleteJson = (path, json, options) => {
+		options = options || {};
+		options.method = options.method || 'DELETE';
+		return Server.postJson(path, json, options);
+	}
+
+	static async login(username, password) {
+		var res;
+		try {
+			res = await Server.postJson('/user/login', {
+				user: username,
+				pass: password,
+			});
+		} catch (e) {
+			return null;
+		}
+
+		if (res) {
+			Server.setAuth(res.token);
+			cookie.set('token', res.token);
+			PubSub.publish('UPDATE_GLOBAL', {
+				user: res.user,
+			});
+		}
+
+		return res;
+	}
+
+	static logout() {
+		Server.setAuth(null);
+		cookie.remove('token');
+		PubSub.publish('UPDATE_GLOBAL', {
+			user: null,
+		});
+	}
+
+	static async saveProfile(profile) {
+		const res = await Server.postJson('/user/profile', profile);
+		if (res.user) {
+			PubSub.publish('UPDATE_GLOBAL', {
+				user: res.user,
+			});
+		}
+		return res.user;
+	}
+
+	static setAuth = (newAuth) => {
+		auth = newAuth;
+	}
+
+	static getUserInfo = () => {
+		return Server.fetchJson('/user');
+	}
+
+	static getInfo = () => {
+		return new Promise((res, rej) => {
+			if (serverInfo)
+				res(serverInfo);
+
+			Server.fetchJson('/').then(json => {
+				serverInfo = json;
+				res(serverInfo);
+			}).catch(err => {
+				rej(err);
+			});
+		});
+	}
+
+	static saveCongif = (cfg) => {
+		Server.postJson('/', cfg).then(() => {
+			serverInfo = undefined;
+			PubSub.publish('CONFIG_CHANGE');
+			PubSub.publish('SHOW_SNACKBAR', {
+				message: 'Server configuration updated',
+				autoHide: 5000,
+			});
+		});
+	}
+
+	static getFolderList = (path) => {
+		return Server.fetchJson('/folders?path=' + path);
+	}
+
+	static getCollections = () => {
+		return Server.fetchJson('/collections');
+	}
+
+	static saveCollection = (collection) => {
+		Server.postJson('/collections', collection).then(() => {
+			serverInfo = undefined;
+			PubSub.publish('COLLECTIONS_CHANGE');
+		});
+	}
+
+	static deleteCollection = (collection) => {
+		Server.deleteJson('/collections', collection).then(() => {
+			serverInfo = undefined;
+			PubSub.publish('COLLECTIONS_CHANGE');
+		});
+	}
+
+	static rescanCollection = (collection) => {
+		Server.postJson(`/collections/${collection.id}/rescan`);
+		PubSub.publish('SHOW_SNACKBAR', {
+			message: `Collection ${collection.name} rescan started.`,
+			autoHide: 5000,
+		});
+	}
+
+	static getLog = (logType) => {
+		return Server.fetchJson('/log/' + (logType ? logType : 'messages'));
+	}
+
+	static getTracklist = (collectionID, sort, filters, search) => {
+		var path = '/tracks/' + collectionID;
+		var params = '';
+		if (sort)
+			params += 'sort=' + sort;
+		if (filters && filters.length > 0) {
+			if (params.length > 0)
+				params += '&';
+			params += 'filter=' + JSON.stringify(filters);
+		}
+		if (search) {
+			if (params.length > 0)
+				params += '&';
+			params += `search=${search}`;
+		}
+		if (params.length > 0)
+			path += '?' + params;
+		return Server.fetchJson(path);
+	}
+
+	static search = (term, sort, filters) => {
+		return Server.getTracklist(0, sort, filters, term);
+	}
+
+	static getPlayers = () => {
+		return new Promise((res) => {
+			Server.fetchJson('/players/').then((players) => {
+				// Return all players, except this one
+				res(players.filter(player => player.id !== this_client_id));
+			});
+		});
+	}
+
+	static getMediaStreamURL = (mediaItem, params) => {
+		var forceHLS = '';
+		if (params && params.forceHLS)
+			forceHLS = '&forceHLS=true';
+
+		return `/api/stream/${mediaItem.db_id}?clientId=${this_client_id}${forceHLS}&token=${auth}`;
+	}
+
+	static getMediaStreamInfo = (mediaItem, params) => {
+		var forceHLS = '';
+		if (params && params.forceHLS)
+			forceHLS = '?forceHLS=true';
+		return Server.fetchJson(`/stream/${mediaItem.db_id}/info${forceHLS}`);
+	}
+
+	static playItem = (playerID, mediaItem) => {
+		Server.postJson('/players/' + playerID + '/play_item', mediaItem).then(() => {
+		});
+	}
+
+	static playPause = (playerID) => {
+		Server.postJson('/players/' + playerID + '/play_pause').then(() => {
+		});
+	}
+
+	static stop = (playerID) => {
+		Server.postJson('/players/' + playerID + '/stop').then(() => {
+		});
+	}
+
+	static seek = (playerID, newTime) => {
+		Server.postJson(`/players/${playerID}/seek/${newTime}`).then(() => {
+		});
+	}
+
+	static updatePlaybackState = (action, mediaItem, currentTime) => {
+		socket.emit('playback', {
+			action: action,
+			mediaItem: mediaItem,
+			currentTime: currentTime,
+		});
+	}
+
+	static addEventHandler = (event, handler) => {
+		socket.on(event, function (...args) {
+			handler(...args);
+		});
+	}
 }
 
-async function start() {
-
-	if (commander.datafolder) {
-		var dir = process.argv.pop();
-		if (dir == '--datafolder') {
-			console.error('--datafolder requires one parameter (folder path)');
-			return;
-		}
-		console.log('Setting custom data directory: ' + dir);
-		configuration.setDataDir(dir);
-	}
-
-	var config = await loadConfig();
-	if (!config)
-		return;
-
-	if (commander.start) {
-		if (await getStatus() !== 'stopped') {
-			console.error('MediaMonkey Server is already running.');
-			return;
-		}
-		console.log('MediaMonkey Server was started as a service.');
-		daemonizeProcess({
-			arguments: process.argv.filter(arg => arg !== '--start'),
-		});
-		return;
-	}
-
-	if (commander.stop) {
-		console.log('Stopping a running MediaMonkey Server...');
-		http.request({
-			port: configuration.getBasicConfig().httpPort,
-			path: '/api/stop',
-			method: 'POST',
-		}, (res) => {
-			if (res.statusCode === 200)
-				console.log('Server successfully stopped.');
-			else
-				console.warn('Server stop failed.');
-		}).on('error', () => {
-			console.error('Server not found.');
-		}).end();
-		return;
-	}
-
-	if (commander.status) {
-		switch (await getStatus()) {
-			case 'running': console.log('1: Server is running.'); break;
-			case 'stopped': console.log('0: Server is not running.'); break;
-			case 'error': console.log('99: Server failure.'); break;
-		}
-		return;
-	}
-
-	var db = await initDB();
-	if (!db)
-		return;	
-
-	// Create an UpnpServer with options
-
-	var server = new Server(commander, directories);
-
-	server.start();
-
-	server.on('waiting',
-		function () {
-
-		}
-	);
-
-	// Catch nodejs problem or signals
-
-	var stopped = false;
-
-	var _stopAndExit = async function () {
-		console.log('disconnecting...');
-		stopped = true;
-
-		await server.stop(() => {});
-
-		// JH: we can remove this timeout sometimes, after we review all the stuff and use async/await everywhere consistently
-		setTimeout(function () {
-			process.exit();
-		}, 1000);
-	};
-
-	pubsub.subscribe('APP_END', () => {
-		_stopAndExit();
-	});
-
-	process.on('SIGINT', () => {
-		pubsub.publishSync('APP_END', null);
-	});
-
-	process.on('uncaughtException', function (err) {
-		if (stopped) {
-			process.exit(0);
-			return;
-		}
-		console.error('Caught exception: ' + err);
-	});
-
-	// Try to profile upnpserver manually !
-
-	if (commander.profiler) {
-		setInterval(function () {
-			console.log(util.inspect(process.memoryUsage()));
-		}, 1000 * 30);
-	}
-
-	if (commander.headDump) {
-		var heapdump = require('heapdump');
-		console.log('***** HEAPDUMP enabled **************');
-		var nextMBThreshold = 0;
-
-		setInterval(function () {
-			var memMB = process.memoryUsage().rss / 1048576;
-			if (memMB > nextMBThreshold) {
-				heapdump.writeSnapshot();
-				nextMBThreshold += 100;
-			}
-		}, 1000 * 60 * 10);
-	}
-
-	sysUI.installTrayIcon();
-}
-
-start();
+export default Server;
