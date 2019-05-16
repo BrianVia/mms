@@ -76,14 +76,12 @@ const styles = theme => ({
 	},
 	albumAvatar: {
 		margin: 4
-	},
-
+	}
 });
 
 const TOTAL_WIDTH = window.innerWidth;
 
 class Collection extends Component {
-
 	defaultDesktopColumns = {
 		title: {
 			dataKey: 'title',
@@ -100,13 +98,12 @@ class Collection extends Component {
 			width: 0.15,
 			cellRenderer: this.renderTextCell,
 			headerRenderer: this.renderDraggableHeader
-
 		},
 		album: {
 			dataKey: 'album',
 			label: 'Album',
 			display: true,
-			width: 0.10,
+			width: 0.1,
 			cellRenderer: this.renderTextCell,
 			headerRenderer: this.renderDraggableHeader
 		},
@@ -114,7 +111,7 @@ class Collection extends Component {
 			dataKey: 'genres',
 			label: 'genres',
 			display: true,
-			width: 0.10,
+			width: 0.1,
 			cellRenderer: this.renderTextCell,
 			headerRenderer: this.renderDraggableHeader
 		},
@@ -122,7 +119,7 @@ class Collection extends Component {
 			dataKey: 'year',
 			label: 'Year',
 			display: true,
-			width: 0.10,
+			width: 0.1,
 			cellRenderer: this.renderTextCell,
 			headerRenderer: this.renderDraggableHeader
 		},
@@ -130,7 +127,7 @@ class Collection extends Component {
 			dataKey: 'duration',
 			label: 'Duration',
 			display: true,
-			width: 0.10,
+			width: 0.1,
 			cellRenderer: this.getDurationCellData,
 			headerRenderer: this.renderDraggableHeader
 		},
@@ -174,7 +171,6 @@ class Collection extends Component {
 	filters = [];
 	minWidth = 5;
 
-
 	updateContent = () => {
 		this.setState({ tracks: [] });
 		if (this.props.search) {
@@ -195,7 +191,9 @@ class Collection extends Component {
 		subscribeCollectionSort(this.handleChangeSort);
 		subscribeCollectionChangeFilters(this.handleChangeFilters);
 
-		const localStorageRefColumns = localStorage.getItem('columnsConfig-' + this.collectionID);
+		const localStorageRefColumns = localStorage.getItem(
+			'columnsConfig-' + this.collectionID
+		);
 
 		if (localStorageRefColumns) {
 			this.setState({ columns: JSON.parse(localStorageRefColumns) });
@@ -265,7 +263,7 @@ class Collection extends Component {
 			return (
 				<img
 					src={rowData.artworkURL}
-					alt='artwork'
+					alt="artwork"
 					className={this.props.classes.artwork}
 				/>
 			);
@@ -277,15 +275,21 @@ class Collection extends Component {
 		}
 	};
 
-	updateDisplayedColumns = (newColumns) => {
+	updateDisplayedColumns = newColumns => {
 		this.setState({ columns: newColumns });
-		localStorage.setItem('columnsConfig-' + this.collectionID, JSON.stringify(newColumns));
+		localStorage.setItem(
+			'columnsConfig-' + this.collectionID,
+			JSON.stringify(newColumns)
+		);
 	};
 
 	renderColumnSelectionHeader = () => {
 		if (this.state.renderTableHeader) {
 			return (
-				<ColumnSelection columns={this.state.columns} updateDisplayedColumns={this.updateDisplayedColumns} />
+				<ColumnSelection
+					columns={this.state.columns}
+					updateDisplayedColumns={this.updateDisplayedColumns}
+				/>
 			);
 		} else {
 			return null;
@@ -302,13 +306,13 @@ class Collection extends Component {
 	}) => {
 		return (
 			<React.Fragment key={dataKey}>
-				<div className='ReactVirtualized__Table__headerTruncatedText'>
+				<div className="ReactVirtualized__Table__headerTruncatedText">
 					{label}
 				</div>
 				<Draggable
-					axis='x'
-					defaultClassName='DragHandle'
-					defaultClassNameDragging='DragHandleActive'
+					axis="x"
+					defaultClassName="DragHandle"
+					defaultClassNameDragging="DragHandleActive"
 					onDrag={(event, { deltaX }) =>
 						this.resizeRow({
 							event,
@@ -335,26 +339,37 @@ class Collection extends Component {
 			const dataKeys = Object.keys(this.state.columns);
 			const nextDataKey =
 				dataKeys[
-				dataKeys.findIndex(element => {
-					return dataKey === element;
-				}) + 1
+					dataKeys.findIndex(element => {
+						return dataKey === element;
+					}) + 1
 				];
-			const column = prevColumns[dataKey];
-			column.width = prevColumns[dataKey].width + percentDelta;
 
-			const nextColumn = prevColumns[nextDataKey];
-			nextColumn.width = prevColumns[nextDataKey].width - percentDelta;
+			if (nextDataKey) {
+				const column = prevColumns[dataKey];
+				column.width = prevColumns[dataKey].width + percentDelta;
 
-			return {
-				columns: {
-					...prevColumns,
-					[dataKey]: column,
-					[nextDataKey]: nextColumn
-				}
-			};
+				const nextColumn = prevColumns[nextDataKey];
+				nextColumn.width = prevColumns[nextDataKey].width - percentDelta;
+
+				return {
+					columns: {
+						...prevColumns,
+						[dataKey]: column,
+						[nextDataKey]: nextColumn
+					}
+				};
+			} else {
+				const column = prevColumns[dataKey];
+				column.width = prevColumns[dataKey].width + percentDelta;
+
+				return {
+					columns: {
+						...prevColumns,
+						[dataKey]: column
+					}
+				};
+			}
 		});
-
-
 
 	handleTrackClick = ({ rowData }) => {
 		//@TODO implement track list selection
@@ -373,43 +388,42 @@ class Collection extends Component {
 	}) => {
 		if (dataKey === 'duration') {
 			cellData = this.getDurationCellData({ cellData });
-		}
-		else if (dataKey === 'artists') {
+		} else if (dataKey === 'artists') {
 			cellData = this.getArtistCellData({ rowData });
-		}
-		else if (dataKey === 'size') {
+		} else if (dataKey === 'size') {
 			cellData = this.getFileSizeCellData({ cellData });
 		}
 
 		if (rowData.db_id === this.state.playingTrack.db_id) {
-			return (<strong>{cellData}</strong>);
+			return <strong>{cellData}</strong>;
 		} else {
 			return cellData;
 		}
-	}
+	};
 
 	renderDynamicColumns = (columns, classes) => {
 		const { headerHeight } = this.state;
 		const tableColumns = [];
 		for (const column in columns) {
-
 			tableColumns.push(
-				columns[column].display ? <Column
-					width={columns[column].width * TOTAL_WIDTH}
-					headerHeight={headerHeight}
-					cellRenderer={this.renderTextCell}
-					label={columns[column].label}
-					flexGrow={columns[column].flexGrow}
-					flexShrink={columns[column].flexShrink}
-					dataKey={columns[column].dataKey}
-					className={classes.cell}
-					headerRenderer={this.renderDraggableHeader}
-				></Column> : null
+				columns[column].display ? (
+					<Column
+						width={columns[column].width * TOTAL_WIDTH}
+						headerHeight={headerHeight}
+						cellRenderer={this.renderTextCell}
+						label={columns[column].label}
+						flexGrow={columns[column].flexGrow}
+						flexShrink={columns[column].flexShrink}
+						dataKey={columns[column].dataKey}
+						className={classes.cell}
+						headerRenderer={this.renderDraggableHeader}
+					/>
+				) : null
 			);
 		}
 
 		return tableColumns;
-	}
+	};
 
 	render() {
 		const { classes } = this.props;
@@ -434,8 +448,8 @@ class Collection extends Component {
 							onRowClick={this.handleTrackClick}
 						>
 							<Column
-								label='Artwork'
-								dataKey='artworkURL'
+								label="Artwork"
+								dataKey="artworkURL"
 								className={classes.cellArtwork}
 								width={60}
 								flexGrow={0}
@@ -446,21 +460,22 @@ class Collection extends Component {
 							{this.renderDynamicColumns(columns, classes)}
 
 							{/*Column Selection Empty Column */}
-							{this.state.renderTableHeader ? (<Column
-								headerRenderer={this.renderColumnSelectionHeader}
-								width={45}
-								flexGrow={0}
-								flexShrink={0}
-								dataKey=''
-								className={classes.cell}
-							/>) : null}
+							{this.state.renderTableHeader ? (
+								<Column
+									headerRenderer={this.renderColumnSelectionHeader}
+									width={45}
+									flexGrow={0}
+									flexShrink={0}
+									dataKey=""
+									className={classes.cell}
+								/>
+							) : null}
 						</Table>
 					)}
 				</AutoSizer>
 			</div>
 		);
 	}
-
 }
 
 Collection.propTypes = {
