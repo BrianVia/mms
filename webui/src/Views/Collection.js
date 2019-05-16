@@ -6,9 +6,9 @@ import { AutoSizer } from 'react-virtualized';
 import { Table, Column } from 'react-virtualized';
 import Avatar from '@material-ui/core/Avatar';
 import Draggable from 'react-draggable';
+import Server from '../server';
+import Playback from '../playback';
 
-import Server from 'server';
-import Playback from 'playback';
 import {
 	subscribeCollectionSort,
 	subscribeCollectionChangeFilters,
@@ -334,11 +334,11 @@ class Collection extends Component {
 
 			const dataKeys = Object.keys(this.state.columns);
 			const nextDataKey =
-        dataKeys[
-        	dataKeys.findIndex(element => {
-        		return dataKey === element;
-        	}) + 1
-        ];
+				dataKeys[
+				dataKeys.findIndex(element => {
+					return dataKey === element;
+				}) + 1
+				];
 			const column = prevColumns[dataKey];
 			column.width = prevColumns[dataKey].width + percentDelta;
 
@@ -353,7 +353,7 @@ class Collection extends Component {
 				}
 			};
 		});
-		
+
 
 
 	handleTrackClick = ({ rowData }) => {
@@ -370,17 +370,17 @@ class Collection extends Component {
 		isScrolling,
 		rowData,
 		rowIndex
-	  })=> {
-		if(dataKey === 'duration'){
-			cellData = this.getDurationCellData({cellData});
+	}) => {
+		if (dataKey === 'duration') {
+			cellData = this.getDurationCellData({ cellData });
 		}
-		else if(dataKey === 'artists') {
-			cellData = this.getArtistCellData({rowData});
+		else if (dataKey === 'artists') {
+			cellData = this.getArtistCellData({ rowData });
 		}
-		else if(dataKey === 'size') {
-			cellData = this.getFileSizeCellData({cellData});
+		else if (dataKey === 'size') {
+			cellData = this.getFileSizeCellData({ cellData });
 		}
-		
+
 		if (rowData.db_id === this.state.playingTrack.db_id) {
 			return (<strong>{cellData}</strong>);
 		} else {
@@ -388,11 +388,11 @@ class Collection extends Component {
 		}
 	}
 
-	renderDynamicColumns = (columns,classes) => {
+	renderDynamicColumns = (columns, classes) => {
 		const { headerHeight } = this.state;
 		const tableColumns = [];
 		for (const column in columns) {
-			
+
 			tableColumns.push(
 				columns[column].display ? <Column
 					width={columns[column].width * TOTAL_WIDTH}

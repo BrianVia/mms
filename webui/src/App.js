@@ -7,6 +7,7 @@ import { withStyles } from '@material-ui/core/styles';
 import AppHeader from './AppHeader';
 import MainDrawer from './MainDrawer';
 import Dialogs from './Dialogs';
+import DialogLogin from './Dialogs/DialogLogin';
 import MainContent from './MainContent';
 import Player from './Player';
 import AudioPlayer from './Fragments/AudioPlayer';
@@ -18,7 +19,7 @@ import { subscribeVideoState } from './actions';
 import { withRouter } from 'react-router-dom';
 import PubSub from 'pubsub-js';
 
-const styles = theme => ({
+const styles = ({
 	root: {
 		position: 'absolute',
 		top: 0,
@@ -27,7 +28,7 @@ const styles = theme => ({
 		right: 0,
 		display: 'flex',
 		'flex-direction': 'column',
-		backgroundColor: theme.palette.background.paper,
+		backgroundColor: '#f0f0f0',
 	},
 	mainContent: {
 		'flex-grow': 100,
@@ -99,9 +100,9 @@ class App extends Component {
 			<div className={classes.root}>
 				{/* Standard view */}
 				<React.Fragment>
-					<AppHeader />
+					<AppHeader user={this.props.user} />
 					<div className={classes.mainContent}>
-						<MainContent />
+						<MainContent user={this.props.user} />
 					</div>
 					<Player />
 				</React.Fragment>
@@ -118,6 +119,7 @@ class App extends Component {
 				{/* Items not visible by default */}
 				<MainDrawer />
 				<Dialogs />
+				<DialogLogin user={this.props.user} />
 				<AudioPlayer />
 			</div >
 		);
@@ -128,6 +130,7 @@ App.propTypes = {
 	classes: PropTypes.object.isRequired,
 	history: PropTypes.object.isRequired,
 	location: PropTypes.object.isRequired,
+	user: PropTypes.object,
 };
 
 // @ts-ignore
