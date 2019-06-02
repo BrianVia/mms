@@ -48,7 +48,7 @@ class ColumnSelection extends Component {
 
 
 			<Select
-				
+
 				IconComponent={() =>
 					<List className={classes.listIconStyle} />
 				}
