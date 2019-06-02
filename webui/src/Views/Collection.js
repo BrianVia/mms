@@ -87,76 +87,113 @@ class Collection extends Component {
 			dataKey: 'title',
 			label: 'Title',
 			display: true,
-			width: 0.15,
-			cellRenderer: this.renderTextCell,
-			headerRenderer: this.renderDraggableHeader
+			width: 0.15
 		},
 		artists: {
 			dataKey: 'artists',
 			label: 'Artists',
 			display: true,
-			width: 0.15,
-			cellRenderer: this.renderTextCell,
-			headerRenderer: this.renderDraggableHeader
+			width: 0.15
 		},
 		album: {
 			dataKey: 'album',
 			label: 'Album',
 			display: true,
-			width: 0.1,
-			cellRenderer: this.renderTextCell,
-			headerRenderer: this.renderDraggableHeader
+			width: 0.1
 		},
 		genres: {
 			dataKey: 'genres',
-			label: 'genres',
+			label: 'Genre',
 			display: true,
-			width: 0.1,
-			cellRenderer: this.renderTextCell,
-			headerRenderer: this.renderDraggableHeader
+			width: 0.1
 		},
 		year: {
 			dataKey: 'year',
 			label: 'Year',
 			display: true,
-			width: 0.1,
-			cellRenderer: this.renderTextCell,
-			headerRenderer: this.renderDraggableHeader
+			width: 0.1
 		},
 		duration: {
 			dataKey: 'duration',
 			label: 'Duration',
 			display: true,
-			width: 0.1,
-			cellRenderer: this.getDurationCellData,
-			headerRenderer: this.renderDraggableHeader
+			width: 0.1
 		},
 		bpm: {
 			dataKey: 'bpm',
 			label: 'BPM',
 			display: true,
-			width: 0.05,
-			cellRenderer: this.renderTextCell,
-			headerRenderer: this.renderDraggableHeader
+			width: 0.05
 		},
 		size: {
 			dataKey: 'size',
 			label: 'Size',
 			display: true,
-			width: 0.05,
-			cellRenderer: this.renderTextCell,
-			headerRenderer: this.renderDraggableHeader
+			width: 0.05
 		},
 		path: {
 			dataKey: 'path',
 			label: 'Path',
 			display: false,
-			width: 0.15,
-			cellRenderer: this.renderTextCell,
-			headerRenderer: this.renderDraggableHeader
+			width: 0.15
 		}
 	};
-	defaultMobileColumns = {};
+	defaultMobileColumns = {
+		title: {
+			dataKey: 'title',
+			label: 'Title',
+			display: true,
+			width: 0.30
+		},
+		artists: {
+			dataKey: 'artists',
+			label: 'Artists',
+			display: true,
+			width: 0.25
+		},
+		album: {
+			dataKey: 'album',
+			label: 'Album',
+			display: true,
+			width: 0.35
+		},
+		genres: {
+			dataKey: 'genres',
+			label: 'Genre',
+			display: false,
+			width: 0.1
+		},
+		year: {
+			dataKey: 'year',
+			label: 'Year',
+			display: false,
+			width: 0.1
+		},
+		duration: {
+			dataKey: 'duration',
+			label: 'Duration',
+			display: false,
+			width: 0.1
+		},
+		bpm: {
+			dataKey: 'bpm',
+			label: 'BPM',
+			display: false,
+			width: 0.05
+		},
+		size: {
+			dataKey: 'size',
+			label: 'Size',
+			display: false,
+			width: 0.05
+		},
+		path: {
+			dataKey: 'path',
+			label: 'Path',
+			display: false,
+			width: 0.15
+		}
+	};
 
 	state = {
 		tracks: [],
@@ -195,8 +232,11 @@ class Collection extends Component {
 			'columnsConfig-' + this.collectionID
 		);
 
-		if (localStorageRefColumns) {
+		//needs to check if width is super different
+		if (localStorageRefColumns && window.innerWidth > 768) {
 			this.setState({ columns: JSON.parse(localStorageRefColumns) });
+			this.setState({ renderTableHeader: true });
+			this.setState({ headerHeight: 30 });
 		} else {
 			if (window.innerWidth < 768) {
 				this.setState({ columns: this.defaultMobileColumns });
@@ -205,6 +245,7 @@ class Collection extends Component {
 			} else {
 				this.setState({ columns: this.defaultDesktopColumns });
 				this.setState({ renderTableHeader: true });
+				this.setState({ headerHeight: 30 });
 			}
 		}
 
@@ -297,12 +338,8 @@ class Collection extends Component {
 	};
 
 	renderDraggableHeader = ({
-		columnData,
 		dataKey,
-		disableSort,
 		label,
-		sortBy,
-		sortDirection
 	}) => {
 		return (
 			<React.Fragment key={dataKey}>
@@ -329,8 +366,8 @@ class Collection extends Component {
 		);
 	};
 
-	resizeRow = ({ dataKey, deltaX }) =>
-		this.setState(prevState => {
+	resizeRow = ({ dataKey, deltaX }) => {
+		return this.setState(prevState => {
 			const prevColumns = prevState.columns;
 			const percentDelta = deltaX / TOTAL_WIDTH;
 
@@ -370,6 +407,7 @@ class Collection extends Component {
 				};
 			}
 		});
+	};
 
 	handleTrackClick = ({ rowData }) => {
 		//@TODO implement track list selection
@@ -379,12 +417,8 @@ class Collection extends Component {
 
 	renderTextCell = ({
 		cellData,
-		columnData,
-		columnIndex,
 		dataKey,
-		isScrolling,
-		rowData,
-		rowIndex
+		rowData
 	}) => {
 		if (dataKey === 'duration') {
 			cellData = this.getDurationCellData({ cellData });
@@ -439,7 +473,7 @@ class Collection extends Component {
 							height={height}
 							className={classes.table}
 							gridClassName={classes.grid}
-							disableHeader={headerHeight === 0}
+							disableHeader={this.state.renderTableHeader === false}
 							headerHeight={headerHeight}
 							rowHeight={48}
 							rowCount={this.state.tracks.length}
@@ -448,10 +482,10 @@ class Collection extends Component {
 							onRowClick={this.handleTrackClick}
 						>
 							<Column
-								label="Artwork"
+								label=""
 								dataKey="artworkURL"
 								className={classes.cellArtwork}
-								width={80}
+								width={60}
 								flexGrow={0}
 								flexShrink={0}
 								cellRenderer={this.renderArtwork}
@@ -467,7 +501,7 @@ class Collection extends Component {
 									flexGrow={0}
 									flexShrink={0}
 									dataKey=""
-									className={classes.cell}
+									className={classes.cellInLastColumn}
 								/>
 							) : null}
 						</Table>
