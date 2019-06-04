@@ -167,6 +167,10 @@ class Server {
 		return Server.fetchJson('/playlists');
 	};
 
+	static getPlaylistContent = (guid) => {
+		return Server.fetchJson(`/playlists/${guid}`);
+	}
+
 	static getLog = (logType) => {
 		return Server.fetchJson('/log/' + (logType ? logType : 'messages'));
 	}
