@@ -13,7 +13,7 @@ import arrayToTree from 'array-to-tree';
 import Server from 'server';
 import { Paper, List, ListItem, ListItemLink, ListItemText, Link } from '@material-ui/core';
 
-import PlaylistCollection from '../Views/Collection';
+import Collection from '../Views/Collection';
 
 const styles = {
 	card: {}
@@ -24,17 +24,23 @@ class Playlist extends Component {
 		playlistsArray: [],
 		playlistsTree: [],
 		selectedPlaylist: null,
-		selectedPlaylistTracks: []
+		selectedPlaylistTracks: [],
+		selectedPlaylistChildren: []
 	};
 
 	componentDidMount = () => {
 		this.getPlaylists();
 	}
 
+	componentDidUpdate = (updates) => {
+		console.log('updates');
+		console.log(updates);
+	}
+
 	getPlaylists = () => {
 		Server.getPlaylists().then(playlists => {
 			this.setState({ playlistsArray: playlists });
-			this.transformPlaylistsArray(playlists);
+			this.setState({ playlistsTree: this.getPlaylistsTree(playlists) });
 		});
 	}
 
@@ -52,22 +58,20 @@ class Playlist extends Component {
 	// 	);
 	// }
 
-	transformPlaylistsArray = (playlists) => {
-		// console.table(playlists);
+	getPlaylistsTree = (playlists) => {
 		let playlistsTree = arrayToTree(playlists, { parentProperty: 'parent_guid', childrenProperty: 'children', customID: 'guid' });
-		this.setState({
-			playlistsTree: playlistsTree
-		});
-
-
+		return playlistsTree;
 	}
 
 
 	getPlaylistContent = (playlist_guid) => {
 		return Server.getPlaylistContent(playlist_guid)
-			.then(tracks => {
-				console.log(tracks);
-				this.setState({ selectedPlaylistTracks: tracks });
+			.then(({ playlists, tracks }) => {
+
+				this.setState({
+					selectedPlaylistTracks: tracks,
+					selectedPlaylistChildren: playlists
+				});
 				return tracks;
 			});
 	}
@@ -77,6 +81,31 @@ class Playlist extends Component {
 		this.setState({ selectedPlaylist: playlist });
 	}
 
+	renderRootPlaylistsList() {
+		return (
+
+
+			this.state.playlistsTree.map((playlist) => {
+				return (
+					<ListItem key={playlist.guid}>
+						<Link onClick={() => this.handlePlaylistClick(playlist)}>{playlist.name}</Link>
+					</ListItem>);
+			})
+		);
+	}
+
+	renderSelectedPlaylist = () => {
+		return (
+			this.state.selectedPlaylistTracks.map((track) => {
+				return (
+					<ListItem key={track.db_id}>
+						{track.title}
+					</ListItem>);
+			})
+		);
+
+
+	}
 
 	render() {
 		const { classes } = this.props;
@@ -85,15 +114,8 @@ class Playlist extends Component {
 			<Grid container justify="flex-start">
 				<Grid item>
 					<List>
-						{this.state.playlistsTree.map((playlist) => {
-							return <ListItem key={playlist.guid}>
-								<Link onClick={() => this.handlePlaylistClick(playlist)}>{playlist.name}</Link>
-							</ListItem>;
-						})}
+						{this.state.selectedPlaylist == null ? this.renderRootPlaylistsList() : this.renderSelectedPlaylist()}
 					</List>
-				</Grid>
-				<Grid item>
-					<PlaylistCollection></PlaylistCollection>
 				</Grid>
 			</Grid>
 		);
