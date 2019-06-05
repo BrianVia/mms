@@ -3,21 +3,26 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
+import Breadcrumbs from '@material-ui/core/Breadcrumbs';
 import Card from '@material-ui/core/Card';
 import CardContent from '@material-ui/core/CardContent';
 import CardHeader from '@material-ui/core/CardHeader';
 import Typography from '@material-ui/core/Typography';
+
+import { Link as RouterLink } from 'react-router-dom';
 
 import arrayToTree from 'array-to-tree';
 
 import Server from 'server';
 import { Paper, List, ListItem, ListItemLink, ListItemText, Link } from '@material-ui/core';
 
-import Collection from '../Views/Collection';
+// import Collection from '../Views/Collection';
 
 const styles = {
 	card: {}
 };
+
+const LinkRouter = props => <Link {...props} component={RouterLink} />;
 
 class Playlist extends Component {
 	state = {
@@ -83,8 +88,6 @@ class Playlist extends Component {
 
 	renderRootPlaylistsList() {
 		return (
-
-
 			this.state.playlistsTree.map((playlist) => {
 				return (
 					<ListItem key={playlist.guid}>
@@ -94,12 +97,12 @@ class Playlist extends Component {
 		);
 	}
 
-	renderSelectedPlaylist = () => {
+	renderSelectedPlaylistChildren = () => {
 		return (
-			this.state.selectedPlaylistTracks.map((track) => {
+			this.state.selectedPlaylistChildren.map((playlist) => {
 				return (
-					<ListItem key={track.db_id}>
-						{track.title}
+					<ListItem key={playlist.guid}>
+						<Link onClick={() => this.handlePlaylistClick(playlist)}>{playlist.name}</Link>
 					</ListItem>);
 			})
 		);
@@ -111,13 +114,23 @@ class Playlist extends Component {
 		const { classes } = this.props;
 
 		return (
-			<Grid container justify="flex-start">
-				<Grid item>
-					<List>
-						{this.state.selectedPlaylist == null ? this.renderRootPlaylistsList() : this.renderSelectedPlaylist()}
-					</List>
+			<div>
+				<div>
+					<Breadcrumbs>
+						<LinkRouter color="inherit" to="/">
+							Home
+						</LinkRouter>
+					</Breadcrumbs>
+				</div>
+				<Grid container justify="flex-start">
+					<Grid item>
+						<List>
+							{this.state.selectedPlaylist == null ? this.renderRootPlaylistsList() : this.renderSelectedPlaylistChildren()}
+						</List>
+					</Grid>
 				</Grid>
-			</Grid>
+			</div>
+
 		);
 	}
 }
