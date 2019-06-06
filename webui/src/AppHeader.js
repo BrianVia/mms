@@ -27,27 +27,27 @@ import { Route, Switch } from 'react-router-dom';
 
 
 const styles = theme => ({
-  root: {
-    width: "100%",
-    zIndex: 100
-  },
-  expand: {
-    flex: 1,
-    display: "flex",
-    alignItems: "center"
-  },
-  menuButton: {
-    marginLeft: -1.5 * theme.spacing.unit,
-    marginRight: 1.5 * theme.spacing.unit
-  },
-  toolbarItem: {
-    marginLeft: theme.spacing.unit,
-    marginRight: theme.spacing.unit
-  }
+	root: {
+		width: '100%',
+		zIndex: 100,
+	},
+	expand: {
+		flex: 1,
+		display: 'flex',
+		alignItems: 'center',
+	},
+	menuButton: {
+		marginLeft: theme.spacing(-1.5),
+		marginRight: theme.spacing(1.5),
+	},
+	toolbarItem: {
+		marginLeft: theme.spacing(1),
+		marginRight: theme.spacing(1),
+	},
 });
 
 class AppHeader extends React.Component {
-  
+
 	state = {
 		auth: true,
 		anchorEl: null,
