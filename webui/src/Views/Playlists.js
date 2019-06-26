@@ -14,6 +14,8 @@ import { Link as RouterLink } from 'react-router-dom';
 import arrayToTree from 'array-to-tree';
 
 import Server from 'server';
+import TrackCollection from '../Fragments/TrackCollection';
+
 import { Paper, List, ListItem, ListItemLink, ListItemText, Link } from '@material-ui/core';
 
 // import Collection from '../Views/Collection';
@@ -38,8 +40,6 @@ class Playlist extends Component {
 	}
 
 	componentDidUpdate = (updates) => {
-		console.log('updates');
-		console.log(updates);
 	}
 
 	getPlaylists = () => {
@@ -106,7 +106,15 @@ class Playlist extends Component {
 					</ListItem>);
 			})
 		);
+	}
 
+	renderPlaylistTracks = () => {
+		return (
+			<div>
+				<TrackCollection tracks={this.state.selectedPlaylistTracks}
+				></TrackCollection>
+			</div>
+		);
 
 	}
 
@@ -127,6 +135,9 @@ class Playlist extends Component {
 						<List>
 							{this.state.selectedPlaylist == null ? this.renderRootPlaylistsList() : this.renderSelectedPlaylistChildren()}
 						</List>
+					</Grid>
+					<Grid item>
+						<div>{this.state.selectedPlaylistTracks.length > 0 ? this.renderPlaylistTracks() : null}</div>
 					</Grid>
 				</Grid>
 			</div>
