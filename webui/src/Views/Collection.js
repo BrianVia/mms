@@ -17,14 +17,17 @@ class Collection extends Component {
 	render() {
 		return (
 			<div>
-				<TrackCollection collectionID={this.props.collectionID}></TrackCollection>
+				<TrackCollection classes={this.props.classes} collectionID={this.props.collectionID} tracks={this.props.tracks} search={this.props.search} searchTerm={this.props.searchTerm}></TrackCollection>
 			</div>
 		);
 	}
 }
 
-Collection.PropTypes = {
-	collectionID: PropTypes.string
+Collection.propTypes = {
+	classes: PropTypes.object.isRequired,
+	collectionID: PropTypes.string,
+	search: PropTypes.bool,
+	searchTerm: PropTypes.string,
 };
 
 export default withStyles(styles)(Collection);
