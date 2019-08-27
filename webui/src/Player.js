@@ -135,7 +135,7 @@ class Player extends React.Component {
 
 						{/* Track title */}
 						<Typography color='inherit' className={classes.flex}>
-							{this.state.trackTitle}
+							{this.state.trackTitle} HELLO
 						</Typography>
 
 						{/* Stop button */}
